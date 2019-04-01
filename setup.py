@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 
 from setuptools import setup, Extension
 import subprocess
@@ -19,7 +19,7 @@ scripts = []
 
 try:
     local_version = '+git.{}'.format(
-        subprocess.check_output('git rev-parse HEAD', shell=True))
+        subprocess.check_output('git rev-parse HEAD', shell=True, encoding='utf8'))
 except Exception:
     local_version = ''
 
