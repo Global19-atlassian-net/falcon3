@@ -1,6 +1,6 @@
 """Job pools for multiprocessing.
 """
-from __future__ import absolute_import
+
 
 from builtins import map
 from builtins import object
@@ -15,7 +15,7 @@ class FakePool(object):
         return list(map(func, iterable))
 
     def imap(self, func, iterable, chunksize=None):
-        return map(func, iterable)
+        return list(map(func, iterable))
 
     def terminate(self):
         pass

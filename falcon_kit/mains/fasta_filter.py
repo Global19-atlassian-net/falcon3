@@ -207,7 +207,7 @@ def write_doublepass_median(fp_out, yield_zmwtuple_func, zmw_filter_func=median_
 
     # For each ZMW, keep only one particular subread.
     selected = collections.defaultdict(int)
-    for zmw_id, zmw_subreads in zmw_dict.iteritems():
+    for zmw_id, zmw_subreads in zmw_dict.items():
         median_zrec = zmw_filter_func(list(zmw_subreads))
         selected[zmw_id] = median_zrec.subread_id
 

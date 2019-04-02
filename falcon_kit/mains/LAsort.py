@@ -6,7 +6,7 @@
 Run LAcheck on each input in args. Exclude any failures from
 the arglist. Then run LAsort on the remaining arglist.
 """
-from __future__ import absolute_import
+
 
 import sys
 import os

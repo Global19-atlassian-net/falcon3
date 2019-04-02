@@ -1,8 +1,8 @@
 """Purely functional code.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 
 from future.utils import viewitems
@@ -531,7 +531,7 @@ def parse_REPmask_code(code):
             pairs = code.split(';')
         assert len(pairs) <= 3
         for i, p in enumerate(pairs):
-            g, c = map(int, p.split(','))
+            g, c = list(map(int, p.split(',')))
             result[i] = (g, c)
     except Exception as exc:
         LOG.exception('Failed to parse REPmask_code {!r}. Using extreme, to produce empty rep tracks.'.format(code))

@@ -11,7 +11,7 @@ Currently, we ignore zmw numbers and instead use a global counter.
 Inputs may be compressed, and may be either fasta or fastq.
 (For now, we ignore QVs.)
 """
-from __future__ import absolute_import
+
 
 
 from future.utils import itervalues

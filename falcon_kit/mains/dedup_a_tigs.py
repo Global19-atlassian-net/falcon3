@@ -1,5 +1,5 @@
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 
 from falcon_kit.FastaReader import open_fasta_reader
 import argparse
@@ -50,7 +50,7 @@ def filter_duplicate(compound_a_ctg, max_idt, max_aln_cov, min_len_diff, min_seq
     ref_seqs = [compound_a_ctg[0]]
 
     # Zeroth sequence is the base seq.
-    for i in xrange(1, len(compound_a_ctg)):
+    for i in range(1, len(compound_a_ctg)):
         header = compound_a_ctg[i].name.split()
         a_ctg_id, v, w, len_, ovl, ne, delta_l, idt, cov = header
         a_ctg_seq = compound_a_ctg[i].sequence
@@ -61,7 +61,7 @@ def filter_duplicate(compound_a_ctg, max_idt, max_aln_cov, min_len_diff, min_seq
 
         # Align against the base sequence and all non-filtered alternate branches.
         loop_to = len(ref_seqs) if ploidy <= 0 else min(ploidy, len(ref_seqs))
-        for j in xrange(0, loop_to):
+        for j in range(0, loop_to):
             # Just fetch the components for readibility.
             ref_ctg_id = ref_seqs[j].name.split()[0]
             ref_seq = ref_seqs[j].sequence

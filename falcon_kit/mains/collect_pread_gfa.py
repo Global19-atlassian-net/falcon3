@@ -92,18 +92,18 @@ def add_edge(gfa_graph, v, w, edge_split_line, preads_overlap_dict, sg_edges_dic
 
 def add_tiling_paths_to_gfa(gfa_graph, tiling_paths, preads_dict, preads_overlap_dict, sg_edges_dict):
     # Add nodes.
-    for ctg_id, tiling_path in tiling_paths.iteritems():
+    for ctg_id, tiling_path in tiling_paths.items():
         for edge in tiling_path.edges:
             add_node(gfa_graph, edge.v, preads_dict)
             add_node(gfa_graph, edge.w, preads_dict)
 
     # Add edges.
-    for ctg_id, tiling_path in tiling_paths.iteritems():
+    for ctg_id, tiling_path in tiling_paths.items():
         for edge in tiling_path.edges:
             add_edge(gfa_graph, edge.v, edge.w, edge.get_split_line(), preads_overlap_dict, sg_edges_dict)
 
     # Add path.
-    for ctg_id, tiling_path in tiling_paths.iteritems():
+    for ctg_id, tiling_path in tiling_paths.items():
         path_nodes = []
         path_cigars = []
         if len(tiling_path.edges) == 0:
@@ -175,15 +175,15 @@ def run(fp_out, p_ctg_tiling_path, a_ctg_tiling_path,
     a_ctg_seqs = load_seqs(a_ctg_fasta, True)
 
     # Collect the sequence lengths from the above dicts.
-    p_ctg_lens = {key: val[0] for key, val in p_ctg_seqs.iteritems()}
-    a_ctg_lens = {key: val[0] for key, val in a_ctg_seqs.iteritems()}
+    p_ctg_lens = {key: val[0] for key, val in p_ctg_seqs.items()}
+    a_ctg_lens = {key: val[0] for key, val in a_ctg_seqs.items()}
 
     # Create whitelists for filtering contigs.
     p_ctg_whitelist = set(p_ctg_seqs.keys())
-    a_ctg_whitelist = set([key for key in a_ctg_seqs.keys()])
+    a_ctg_whitelist = set([key for key in list(a_ctg_seqs.keys())])
     if only_these_contigs:
         p_ctg_whitelist = set(open(only_these_contigs).read().splitlines()) & set(p_ctg_whitelist)
-        a_ctg_whitelist = set([key for key in a_ctg_seqs.keys() if key.split('-')[0].split('_')[0] in p_ctg_whitelist])
+        a_ctg_whitelist = set([key for key in list(a_ctg_seqs.keys()) if key.split('-')[0].split('_')[0] in p_ctg_whitelist])
 
     # Load the tiling paths and assign coordinates.
     p_paths = falcon_kit.tiling_path.load_tiling_paths(p_ctg_tiling_path, whitelist_seqs=p_ctg_whitelist, contig_lens=p_ctg_lens)

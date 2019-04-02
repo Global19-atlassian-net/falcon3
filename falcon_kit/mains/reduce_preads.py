@@ -2,8 +2,8 @@
 Creates a reduced version of preads4falcon.fasta file by writing only the preads
 which are incident with 'G' edges in the final assembly graph.
 """
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 
 import argparse
 import logging

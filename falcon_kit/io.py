@@ -1,5 +1,5 @@
-from __future__ import absolute_import
-from __future__ import division
+
+
 
 from pypeflow.io import (
         syscall, capture, cd,
@@ -37,7 +37,7 @@ class Percenter(object):
             counter(len(rec))
     """
     def __init__(self, name, total, log=LOG.info, units='units'):
-        if sys.maxint == total:
+        if sys.maxsize == total:
             log('Counting {} from "{}"'.format(units, name))
         else:
             log('Counting {:,d} {} from\n  "{}"'.format(total, units, name))
@@ -57,7 +57,7 @@ class Percenter(object):
             self.a = max(self.a, more)
             self.a = min(self.a, (self.total-self.count), round(self.total/10.0))
             self.next_count = self.count + self.a
-            if self.total == sys.maxint:
+            if self.total == sys.maxsize:
                 msg = '{:>10} count={:15,d} {}'.format(
                     '#{:,d}'.format(self.call), self.count, label)
             else:
@@ -71,13 +71,13 @@ class Percenter(object):
 
 def FilePercenter(fn, log=LOG.info):
     if '-' == fn or not fn:
-        size = sys.maxint
+        size = sys.maxsize
     else:
         size = filesize(fn)
         if fn.endswith('.dexta'):
             size = size * 4
         elif fn.endswith('.gz'):
-            size = sys.maxint # probably 2.8x to 3.2x, but we are not sure, and higher is better than lower
+            size = sys.maxsize # probably 2.8x to 3.2x, but we are not sure, and higher is better than lower
             # https://stackoverflow.com/a/22348071
             # https://jira.pacificbiosciences.com/browse/TAG-2836
     return Percenter(fn, size, log, units='bytes')

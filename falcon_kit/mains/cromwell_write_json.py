@@ -8,7 +8,7 @@ So we use write_lines() instead.
 
 Then, this little program can convert those lines into JSON.
 """
-from __future__ import absolute_import
+
 
 import argparse
 import logging

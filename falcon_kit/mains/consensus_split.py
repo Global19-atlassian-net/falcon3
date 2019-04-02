@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 
 from future.utils import viewitems
@@ -27,7 +27,7 @@ def read_gathered_las(path):
     result = collections.defaultdict(list)
     dn = os.path.normpath(os.path.dirname(path))
     p_id2las = io.deserialize(path)
-    for block, las_path in p_id2las.items():
+    for block, las_path in list(p_id2las.items()):
             result[int(block)].append(corrected_relpath(las_path, dn))
     #import pprint
     #LOG.warning('path={!r}, result={}'.format(

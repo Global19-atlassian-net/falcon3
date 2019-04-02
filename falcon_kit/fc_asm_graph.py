@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 from builtins import zip
 from builtins import object
@@ -6,7 +6,7 @@ from .FastaReader import open_fasta_reader
 from .io import FilePercenter
 import networkx as nx
 
-RCMAP = dict(zip("ACGTacgtNn-", "TGCAtgcaNn-"))
+RCMAP = dict(list(zip("ACGTacgtNn-", "TGCAtgcaNn-")))
 
 
 def reverse_end(node_id):

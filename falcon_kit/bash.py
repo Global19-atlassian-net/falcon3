@@ -1,6 +1,6 @@
 """Most bash-scripting is generated here.
 """
-from __future__ import absolute_import
+
 
 BASH = '/bin/bash'
 BUG_avoid_Text_file_busy = True

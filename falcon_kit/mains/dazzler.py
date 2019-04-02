@@ -47,7 +47,7 @@
 
     Catrack -dfv raw_reads.db tan
 '''
-from __future__ import absolute_import
+
 
 import argparse
 import collections
@@ -406,7 +406,7 @@ def track_combine(db_fn, track, anno_fofn_fn, data_fofn_fn):
         return symlink(fn, bn)
     # Inputs will be symlinked into CWD, sans our prefix (assumed to be "dot").
     # Note: we cannot use "validated" yielders b/c these can be zero-size.
-    for (i, pair) in enumerate(itertools.izip_longest(
+    for (i, pair) in enumerate(itertools.zip_longest(
             io.yield_abspath_from_fofn(anno_fofn_fn),
             io.yield_abspath_from_fofn(data_fofn_fn))):
         (anno_fn, data_fn) = pair
@@ -829,7 +829,7 @@ def daligner_combine(db_fn, gathered_fn, las_paths_fn):
         return os.path.join(d, fn)
     job_done_fns = list()
     for job_output in gathered:
-        for fn in job_output.values():
+        for fn in list(job_output.values()):
             abs_fn = abspath(fn)
             job_done_fns.append(abs_fn)
     #import pprint
@@ -922,7 +922,7 @@ def ichunked(seq, chunksize):
     from itertools import chain, islice
     it = iter(seq)
     while True:
-        yield chain([it.next()], islice(it, chunksize-1))
+        yield chain([next(it)], islice(it, chunksize-1))
 
 def merge_apply(las_paths_fn, las_fn):
     """Merge the las files into one, a few at a time.
@@ -969,7 +969,7 @@ def merge_combine(gathered_fn, las_paths_fn, block2las_fn):
     las_fns = list()
     for job_output in gathered:
         assert len(job_output) == 1, 'len(job_output) == {} != 1'.format(len(job_output))
-        for fn in job_output.values():
+        for fn in list(job_output.values()):
             abs_fn = abspath(fn)
             las_fns.append(abs_fn)
     #import pprint

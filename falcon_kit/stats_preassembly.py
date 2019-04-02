@@ -5,8 +5,8 @@ See FALCON-pbsmrtpipe/pbfalcon/report_preassembly.py for XML version.
 """
 # Copied from
 #   http://swarm/files/depot/branches/springfield/S2.3/software/smrtanalysis/bioinformatics/tools/pbreports/pbreports/report/preassembly.py
-from __future__ import absolute_import
-from __future__ import division
+
+
 
 
 from future.utils import viewitems

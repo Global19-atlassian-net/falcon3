@@ -2,7 +2,7 @@
 This must not run in a tmpdir. The 'inputs' paths will
 end up relative to the rundir.
 """
-from __future__ import absolute_import
+
 
 import argparse
 import collections
@@ -22,7 +22,7 @@ def validate(bash_template, inputs, outputs, parameterss):
     def validate_dict(mydict):
         "Python identifiers are illegal as keys."
         try:
-            collections.namedtuple('validate', mydict.keys())
+            collections.namedtuple('validate', list(mydict.keys()))
         except ValueError as exc:
             LOG.exception('Bad key name in task definition dict {!r}'.format(mydict))
             raise
@@ -48,7 +48,7 @@ def run(all_uow_list_fn, split_idx, one_uow_list_fn):
         return rel
     if isinstance(one_uow, dict):
         input_dict = one_uow['input']
-        for k, v in input_dict.items():
+        for k, v in list(input_dict.items()):
             input_dict[k] = fixpath(v)
 
     io.serialize(one_uow_list_fn, [one_uow])

@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 import argparse
 import logging
@@ -28,9 +28,9 @@ def run(result_fn_list_fn, gathered_fn):
         # where outputs are relative to the location of result_fn.
         some_abs_results = list()
         for one in some_results:
-            for v in one.itervalues():
+            for v in one.values():
                 assert not v.startswith('/'), '{!r} was expected to be relative'.format(v)
-            abs_one = {k: abspath(v) for k,v in one.items()}
+            abs_one = {k: abspath(v) for k,v in list(one.items())}
             some_abs_results.append(abs_one)
         gathered.extend(some_abs_results)
     io.serialize(gathered_fn, gathered)

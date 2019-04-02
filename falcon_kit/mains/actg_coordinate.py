@@ -1,5 +1,5 @@
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 
 from falcon_kit.FastaReader import open_fasta_reader
 import sys

@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 import argparse
 import collections
@@ -41,7 +41,7 @@ def run(all_uow_list_fn, pattern, nchunks_max):
         for one_uow in uows:
             if isinstance(one_uow, dict):
                 input_dict = one_uow['input']
-                for k, v in input_dict.items():
+                for k, v in list(input_dict.items()):
                     input_dict[k] = fixpath(v)
 
         io.serialize(fn, uows)

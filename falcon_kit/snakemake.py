@@ -1,7 +1,7 @@
 """Exact copy of falcon_unzip/tasks/snakemake.py
 TODO: Consolidate.
 """
-from __future__ import absolute_import
+
 
 
 from future.utils import viewitems
@@ -125,7 +125,7 @@ rule dynamic_%(rule_name)s_merge:
         self.write(rule)
     def write_script_rule(self, inputs, outputs, parameters, shell_template, rule_name):
         assert '_bash_' not in parameters
-        first_output_name, first_output_fn = outputs.items()[0] # for rundir, since we cannot sub wildcards in shell
+        first_output_name, first_output_fn = list(outputs.items())[0] # for rundir, since we cannot sub wildcards in shell
         if not rule_name:
             rule_name = os.path.dirname(first_output_fn)
         rule_name = self.unique_rule_name(self.legalize(rule_name))

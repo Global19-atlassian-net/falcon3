@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 import argparse
 import collections
@@ -75,7 +75,7 @@ def bam2dexta_combine(gathered_fn, dexta_fofn_fn):
     dexta_fns = list()
     for job_output in gathered:
         assert len(job_output) == 1, 'len(job_output) == {} != 1'.format(len(job_output))
-        for fn in job_output.values():
+        for fn in list(job_output.values()):
             abs_fn = abspath(fn)
             dexta_fns.append(abs_fn)
     dexta_paths = list()

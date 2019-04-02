@@ -16,8 +16,8 @@ It aligns them to produce the identity score
 After that the dedup_a_tigs.py script is used to deduplicate fake a_ctg.
 But that script is simple, and only depends on the alignment info that the previous script stored in the a_ctg header.
 """
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 
 
 from builtins import zip
@@ -30,7 +30,7 @@ import networkx as nx
 from ..FastaReader import open_fasta_reader
 from ..io import open_progress
 
-RCMAP = dict(zip("ACGTacgtNn-", "TGCAtgcaNn-"))
+RCMAP = dict(list(zip("ACGTacgtNn-", "TGCAtgcaNn-")))
 
 def log(msg):
     sys.stderr.write(msg)
@@ -261,7 +261,7 @@ def run(improper_p_ctg, proper_a_ctg, preads_fasta_fn, sg_edges_list_fn, utg_dat
                 atig_output = []
 
                 # Compose the base sequence.
-                for sub_id in xrange(len(a_ctg_group[(v, w)])):
+                for sub_id in range(len(a_ctg_group[(v, w)])):
                     score, atig_path = a_ctg_group[(v, w)][sub_id]
                     atig_path_edges = list(zip(atig_path[:-1], atig_path[1:]))
 

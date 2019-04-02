@@ -2,7 +2,7 @@
 needed to modify the TASK SCRIPT to use our copy of
 generic_gather.py (not used now).
 """
-from __future__ import absolute_import
+
 
 import logging
 import os
@@ -51,7 +51,7 @@ def wrap_gen_task(script, inputs, outputs, rule_writer=None, parameters=None, di
     inputs = get_rel(inputs)
     outputs = get_rel(outputs)
 
-    first_output_dir = os.path.normpath(os.path.dirname(outputs.values()[0]))
+    first_output_dir = os.path.normpath(os.path.dirname(list(outputs.values())[0]))
     rel_topdir = os.path.relpath('.', first_output_dir) # redundant for rel-inputs, but fine
     params = dict(parameters)
     params['topdir'] = rel_topdir
@@ -114,7 +114,7 @@ def gen_parallel_tasks(
     bash_template_fn = run_dict['bash_template_fn']
 
     def find_wildcard_input(inputs):
-        for k,v in inputs.items():
+        for k,v in list(inputs.items()):
             if '{' in v:
                 return v
         else:
@@ -136,7 +136,7 @@ def gen_parallel_tasks(
         def resolved_dict(d):
             result = dict(d)
             LOG.debug(' wildcards={!r}'.format(wildcards))
-            for k,v in d.items():
+            for k,v in list(d.items()):
                 LOG.debug('  k={}, v={!r}'.format(k, v))
                 result[k] = v.format(**wildcards)
             return result
@@ -172,14 +172,14 @@ def gen_parallel_tasks(
         ))
         wildcards_str = '_'.join(w for w in itervalues(job['wildcards']))
         job_name = 'job{}'.format(wildcards_str)
-        task_results[job_name] = task_outputs.values()[0]
+        task_results[job_name] = list(task_outputs.values())[0]
 
     gather_inputs = dict(task_results)
     ## An implicit "gatherer" simply takes the output filenames and combines their contents.
     gathered_dn = os.path.dirname(gathered_fn)
     result_fn_list_fn = os.path.join(gathered_dn, 'result-fn-list.json')
     # Dump (with rel-paths) into next task-dir before next task starts.
-    io.serialize(result_fn_list_fn, [os.path.relpath(v, gathered_dn) for v in task_results.values()])
+    io.serialize(result_fn_list_fn, [os.path.relpath(v, gathered_dn) for v in list(task_results.values())])
     #assert 'result_fn_list' not in gather_inputs
     #gather_inputs['result_fn_list'] = result_fn_list_fn # No! pseudo output, since it must exist in a known directory
     LOG.debug('gather_inputs:{!r}'.format(gather_inputs))

@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 import argparse
 import collections
@@ -19,7 +19,7 @@ def validate(bash_template, inputs, outputs, parameterss):
     def validate_dict(mydict):
         "Python identifiers are illegal as keys."
         try:
-            collections.namedtuple('validate', mydict.keys())
+            collections.namedtuple('validate', list(mydict.keys()))
         except ValueError as exc:
             LOG.exception('Bad key name in task definition dict {!r}'.format(mydict))
             raise
@@ -28,7 +28,7 @@ def validate(bash_template, inputs, outputs, parameterss):
     validate_dict(parameterss)
 
 def update_values_rel_to(things, dn):
-    for key, val in things.items():
+    for key, val in list(things.items()):
         try:
             if not os.path.isabs(val):
                 things[key] = os.path.normpath(os.path.join(dn, val))
@@ -64,8 +64,8 @@ def run(bash_template_fn, units_of_work_fn, nproc,
         script = open(bash_template_fn).read()
         with io.cd(uow_dir):
             pypeflow.do_task.run_bash(script, inputs, outputs, params)
-            resolved_outputs = {k: os.path.abspath(v) for k,v in outputs.items()}
-        results.append({k: os.path.join('.', os.path.relpath(v)) for k,v in resolved_outputs.items()})
+            resolved_outputs = {k: os.path.abspath(v) for k,v in list(outputs.items())}
+        results.append({k: os.path.join('.', os.path.relpath(v)) for k,v in list(resolved_outputs.items())})
         # Must be relative to this dir.
         # (We assume outputs are under the current directory.)
         # The reason for the './' prefix? So we can substitute in CWD later,

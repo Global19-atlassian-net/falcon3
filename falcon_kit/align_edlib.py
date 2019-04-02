@@ -1,5 +1,5 @@
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 
 import argparse
 import sys
@@ -17,7 +17,7 @@ def count_cigar_ops(cigar):
     """
     b = 0
     num_m, num_i, num_d = 0, 0, 0
-    for i in xrange(len(cigar)):
+    for i in range(len(cigar)):
         if cigar[i] <= '9':
             continue
         # Check if there are no digits before the op char.

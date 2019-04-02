@@ -16,19 +16,19 @@ def run(fp_out, p_ctg_tiling_path, a_ctg_tiling_path,
 
     # Load the primary and associate contig files.
     p_ctg_dict = falcon_kit.mains.collect_pread_gfa.load_seqs(p_ctg_fasta, (not write_contigs))
-    p_ctg_lens = {key: val[0] for key, val in p_ctg_dict.iteritems()}
-    p_ctg_seqs = {key: val[1] for key, val in p_ctg_dict.iteritems()}
+    p_ctg_lens = {key: val[0] for key, val in p_ctg_dict.items()}
+    p_ctg_seqs = {key: val[1] for key, val in p_ctg_dict.items()}
 
     a_ctg_dict = falcon_kit.mains.collect_pread_gfa.load_seqs(a_ctg_fasta, (not write_contigs))
-    a_ctg_lens = {key: val[0] for key, val in a_ctg_dict.iteritems()}
-    a_ctg_seqs = {key: val[1] for key, val in a_ctg_dict.iteritems()}
+    a_ctg_lens = {key: val[0] for key, val in a_ctg_dict.items()}
+    a_ctg_seqs = {key: val[1] for key, val in a_ctg_dict.items()}
 
     # Create whitelists for filtering contigs.
     p_ctg_whitelist = set(p_ctg_seqs.keys())
-    a_ctg_whitelist = set([key for key in a_ctg_seqs.keys()])
+    a_ctg_whitelist = set([key for key in list(a_ctg_seqs.keys())])
     if only_these_contigs:
         p_ctg_whitelist = set(open(only_these_contigs).read().splitlines()) & set(p_ctg_whitelist)
-        a_ctg_whitelist = set([key for key in a_ctg_seqs.keys() if key.split('-')[0].split('_')[0] in p_ctg_whitelist])
+        a_ctg_whitelist = set([key for key in list(a_ctg_seqs.keys()) if key.split('-')[0].split('_')[0] in p_ctg_whitelist])
 
     # Load the tiling paths and assign coordinates.
     p_paths = falcon_kit.tiling_path.load_tiling_paths(p_ctg_tiling_path, whitelist_seqs=p_ctg_whitelist, contig_lens=p_ctg_lens)
@@ -39,14 +39,14 @@ def run(fp_out, p_ctg_tiling_path, a_ctg_tiling_path,
     a_placement = falcon_kit.tiling_path.find_a_ctg_placement(p_paths, a_paths)
 
     # Add the nodes.
-    for ctg_id, tiling_path in p_paths.iteritems():
+    for ctg_id, tiling_path in p_paths.items():
         gfa_graph.add_node(ctg_id, p_ctg_lens[ctg_id], p_ctg_seqs[ctg_id])
-    for ctg_id, tiling_path in a_paths.iteritems():
+    for ctg_id, tiling_path in a_paths.items():
         gfa_graph.add_node(ctg_id, a_ctg_lens[ctg_id], a_ctg_seqs[ctg_id])
 
     # Add edges between primary and associate contigs.
-    for p_ctg_id, a_dict in a_placement.iteritems():
-        for a_ctg_id, placement in a_dict.iteritems():
+    for p_ctg_id, a_dict in a_placement.items():
+        for a_ctg_id, placement in a_dict.items():
             start, end, p_ctg_id, a_ctg_id, first_node, last_node = placement
 
             a_ctg_len = a_ctg_lens[a_ctg_id]
@@ -60,7 +60,7 @@ def run(fp_out, p_ctg_tiling_path, a_ctg_tiling_path,
             gfa_graph.add_edge(edge_name, a_ctg_id, '+', p_ctg_id, '+', a_ctg_len, a_ctg_len, end, end, '*', tags = {}, labels = {})
 
     # Add circular edges to the primary contigs, if they exist.
-    for ctg_id, tiling_path in p_paths.iteritems():
+    for ctg_id, tiling_path in p_paths.items():
         if len(tiling_path.edges) == 0:
             continue
         if tiling_path.edges[0].v != tiling_path.edges[-1].w:

@@ -1,5 +1,5 @@
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 
 
 from builtins import zip
@@ -9,7 +9,7 @@ from falcon_kit.fc_asm_graph import AsmGraph
 import networkx as nx
 import sys
 
-RCMAP = dict(zip("ACGTacgtNn-", "TGCAtgcaNn-"))
+RCMAP = dict(list(zip("ACGTacgtNn-", "TGCAtgcaNn-")))
 
 
 def rc(seq):

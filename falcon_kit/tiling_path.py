@@ -35,7 +35,7 @@ class TilingPath(object):
         self.contig_len = 0
         self.first_node_offset = 0
 
-        for i in xrange(1, len(tiling_edge_list)):
+        for i in range(1, len(tiling_edge_list)):
             assert(tiling_edge_list[i-1].w == tiling_edge_list[i].v)
 
         # If the total contig sequence len is known, use that to
@@ -57,7 +57,7 @@ class TilingPath(object):
         # Create a lookup of node to edge.
         self.v_to_edge = {}
         self.w_to_edge = {}
-        for i in xrange(len(self.edges)):
+        for i in range(len(self.edges)):
             e = self.edges[i]
             self.v_to_edge[e.v] = i
             self.w_to_edge[e.w] = i
@@ -91,7 +91,7 @@ class TilingPath(object):
             start_edge = 0
         if end_coord <= self.coords[self.edges[0].v]:
             end_edge = 1
-        for i in xrange(len(self.edges)):
+        for i in range(len(self.edges)):
             e = self.edges[i]
             if start_coord >= self.coords[e.v] and start_coord < self.coords[e.w]:
                 start_edge = i
@@ -172,7 +172,7 @@ def load_tiling_paths_from_split_lines(split_lines, contig_lens=None, whitelist_
     # Convert the flat lists to TilingPath objects.
     # These keep track of
     tiling_paths = {}
-    for ctg_id, edges in tiling_path_edges.iteritems():
+    for ctg_id, edges in tiling_path_edges.items():
         ctg_len = None
         if contig_lens != None and ctg_id in contig_lens:
             ctg_len = contig_lens[ctg_id]
@@ -187,7 +187,7 @@ def find_a_ctg_placement(p_paths, a_paths):
         placement[p_ctg_id][a_ctg_id] = (start, end, p_ctg_id, a_ctg_id, first_node, last_node)
     """
     placement = {}
-    for a_ctg_id, a_tp in a_paths.iteritems():
+    for a_ctg_id, a_tp in a_paths.items():
         if len(a_tp.edges) == 0: continue       # pragma: no cover
         first_node = a_tp.edges[0].v
         last_node = a_tp.edges[-1].w

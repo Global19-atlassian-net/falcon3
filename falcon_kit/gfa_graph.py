@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 import os
 import sys
 import json
@@ -161,14 +161,14 @@ class GFAGraph:
         fp_out.write(line + '\n')
 
         # Sequences.
-        for node_name, node_data in self.nodes.iteritems():
+        for node_name, node_data in self.nodes.items():
             line = '\t'.join([  GFA_S_TAG,
                                 node_data[KW_NAME],
                                 node_data[KW_NODE_SEQ],
                                 'LN:i:%d' % node_data[KW_NODE_LEN]])
             fp_out.write(line + '\n')
 
-        for edge, edge_data in self.edges.iteritems():
+        for edge, edge_data in self.edges.items():
             cigar = edge_data[KW_EDGE_CIGAR] if edge_data[KW_EDGE_CIGAR] != '*' else '%dM' % (abs(edge_data[KW_EDGE_SINK_END] - edge_data[KW_EDGE_SINK_START]))
 
             line = '\t'.join([str(val) for val in
@@ -182,7 +182,7 @@ class GFAGraph:
                             ])
             fp_out.write(line + '\n')
 
-        for path_name, path_data in self.paths.iteritems():
+        for path_name, path_data in self.paths.items():
             line = '\t'.join([GFA_P_TAG, path_data[KW_NAME], ','.join(path_data[KW_PATH_NODES]), ','.join(path_data[KW_PATH_CIGARS])])
             fp_out.write(line + '\n')
 
@@ -192,14 +192,14 @@ class GFAGraph:
         fp_out.write(line + '\n')
 
         # Sequences.
-        for node_name, node_data in self.nodes.iteritems():
+        for node_name, node_data in self.nodes.items():
             line = '\t'.join([  GFA_S_TAG,
                                 node_data[KW_NAME],
                                 str(node_data[KW_NODE_LEN]),
                                 node_data[KW_NODE_SEQ]])
             fp_out.write(line + '\n')
 
-        for edge, edge_data in self.edges.iteritems():
+        for edge, edge_data in self.edges.items():
             v = edge_data[KW_EDGE_SOURCE]
             w = edge_data[KW_EDGE_SINK]
             v_len = self.nodes[v][KW_NODE_LEN]

@@ -1,6 +1,3 @@
-from __future__ import absolute_import
-
-
 from future.utils import viewitems
 
 from . import bash, functional
@@ -20,7 +17,7 @@ import uuid
 
 logger = logging.getLogger(__name__)
 
-from ConfigParser import SafeConfigParser as ConfigParser
+from configparser import SafeConfigParser as ConfigParser
 
 
 def _prepend_env_paths(content, names):
@@ -318,7 +315,7 @@ def check_config_sections(cfg):
             'job.step.asm',
             'job.defaults',
     ])
-    all_sections = set(k for k,v in cfg.items() if isinstance(v, dict))
+    all_sections = set(k for k,v in list(cfg.items()) if isinstance(v, dict))
     unexpected = all_sections - allowed_sections
     if unexpected:
         msg = 'You have {} unexpected cfg sections: {}'.format(
