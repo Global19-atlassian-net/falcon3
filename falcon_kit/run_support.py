@@ -17,7 +17,7 @@ import uuid
 
 logger = logging.getLogger(__name__)
 
-from configparser import SafeConfigParser as ConfigParser
+from configparser import ConfigParser
 
 
 def _prepend_env_paths(content, names):
@@ -293,9 +293,9 @@ def parse_cfg_with_sections(stream):
     except ValueError:
         pass #logger.exception('Could not parse stream as JSON.')
     try:
-        config = ConfigParser() #strict=False?
+        config = ConfigParser(strict=False)
         config.optionxform = str
-        config.readfp(NativeIO(content))
+        config.read_file(NativeIO(content))
         sections = config.sections()
         for sec in sections:
             result[sec] = dict(config.items(sec))

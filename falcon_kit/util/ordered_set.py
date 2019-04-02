@@ -1,7 +1,7 @@
 # http://code.activestate.com/recipes/576694/
-import collections
+import collections.abc
 
-class OrderedSet(collections.MutableSet):
+class OrderedSet(collections.abc.MutableSet):
 
     def __init__(self, iterable=None):
         self.end = end = [] 
