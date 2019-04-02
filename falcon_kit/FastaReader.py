@@ -77,7 +77,7 @@ class FastaRecord(object):
             assert self.DELIMITER not in sequence
             self._name = name
             self._sequence = sequence
-            self._md5 = hashlib.md5(self._sequence.encode('utf8')).hexdigest()
+            self._md5 = hashlib.md5(self._sequence.encode('ascii')).hexdigest()
             self._id, self._metadata = splitFastaHeader(name)
         except AssertionError:
             raise ValueError("Invalid FASTA record data")

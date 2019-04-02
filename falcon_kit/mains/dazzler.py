@@ -829,7 +829,7 @@ def daligner_combine(db_fn, gathered_fn, las_paths_fn):
         return os.path.join(d, fn)
     job_done_fns = list()
     for job_output in gathered:
-        for fn in list(job_output.values()):
+        for fn in job_output.values():
             abs_fn = abspath(fn)
             job_done_fns.append(abs_fn)
     #import pprint

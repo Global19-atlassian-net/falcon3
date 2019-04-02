@@ -15,8 +15,8 @@ def get_aln_data(t_seq, q_seq):
     """
     Inputs are Unicode.
     """
-    t_seq = t_seq.encode('utf8')
-    q_seq = q_seq.encode('utf8')
+    t_seq = t_seq.encode('ascii')
+    q_seq = q_seq.encode('ascii')
     aln_data = []
     #x = []
     #y = []

@@ -97,8 +97,8 @@ def get_global_aln_results(ref_seq, query_seq, min_seq_len):
 
     Inputs in Unicode.
     """
-    ref_seq = ref_seq.encode('utf8')
-    query_seq = query_seq.encode('utf8')
+    ref_seq = ref_seq.encode('ascii')
+    query_seq = query_seq.encode('ascii')
 
     log('Aligning (Edlib): len(ref_seq) = %d, len(query_seq) = %d' % (len(ref_seq), len(query_seq)))
     delta_len = len(query_seq) - len(ref_seq)
@@ -133,8 +133,8 @@ def get_aln_results(ref_seq, query_seq, min_seq_len):
 
     Inputs in Unicode.
     """
-    ref_seq = ref_seq.encode('utf8')
-    query_seq = query_seq.encode('utf8')
+    ref_seq = ref_seq.encode('ascii')
+    query_seq = query_seq.encode('ascii')
 
     log('Aligning (Edlib): len(ref_seq) = %d, len(query_seq) = %d' % (len(ref_seq), len(query_seq)))
 
