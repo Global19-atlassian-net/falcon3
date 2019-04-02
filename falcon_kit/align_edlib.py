@@ -14,6 +14,8 @@ def log(msg):
 def count_cigar_ops(cigar):
     """
     For curious people: regexes are very slow for parsing CIGAR strings.
+
+    cigar: Unicode
     """
     b = 0
     num_m, num_i, num_d = 0, 0, 0
@@ -39,6 +41,9 @@ def count_cigar_ops(cigar):
     return num_m, num_i, num_d, total_len
 
 def get_aln_data(t_seq, q_seq):
+    """
+    Inputs in bytes.
+    """
     aln_data = []
     K = 8
     seq0 = t_seq
@@ -89,7 +94,12 @@ def get_global_aln_results(ref_seq, query_seq, min_seq_len):
     compatible with the legacy deduplication code.
     Currently unused - it was used in an intermediate version, and might be useful
     at some point in the future.
+
+    Inputs in Unicode.
     """
+    ref_seq = ref_seq.encode('utf8')
+    query_seq = query_seq.encode('utf8')
+
     log('Aligning (Edlib): len(ref_seq) = %d, len(query_seq) = %d' % (len(ref_seq), len(query_seq)))
     delta_len = len(query_seq) - len(ref_seq)
 
@@ -100,7 +110,7 @@ def get_global_aln_results(ref_seq, query_seq, min_seq_len):
         return delta_len, idt, cov
 
     result = edlib.align(query_seq, ref_seq, mode="NW", task="path")
-
+    # result map is Unicode
     cigar = result['cigar']
     num_m, num_i, num_d, total_len = count_cigar_ops(result['cigar'])
     num_eq = (num_m + num_i + num_d) - result['editDistance']
@@ -120,7 +130,12 @@ def get_aln_results(ref_seq, query_seq, min_seq_len):
     """
     Runs the legacy mapping code, and aligns the selected region using Edlib
     instead of the legacy DWA alignment with quadratic memory.
+
+    Inputs in Unicode.
     """
+    ref_seq = ref_seq.encode('utf8')
+    query_seq = query_seq.encode('utf8')
+
     log('Aligning (Edlib): len(ref_seq) = %d, len(query_seq) = %d' % (len(ref_seq), len(query_seq)))
 
     delta_len = len(query_seq) - len(ref_seq)

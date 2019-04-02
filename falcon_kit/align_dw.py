@@ -12,6 +12,11 @@ def log(msg):
     sys.stderr.write('\n')
 
 def get_aln_data(t_seq, q_seq):
+    """
+    Inputs are Unicode.
+    """
+    t_seq = t_seq.encode('utf8')
+    q_seq = q_seq.encode('utf8')
     aln_data = []
     #x = []
     #y = []
@@ -55,8 +60,8 @@ def get_aln_data(t_seq, q_seq):
             if alignment[0].aln_str_size > 100:
                 aln_data.append((q_id, 0, s1, e1, len(q_seq), s2, e2, len(
                     seq0), alignment[0].aln_str_size, alignment[0].dist))
-                aln_str1 = alignment[0].q_aln_str
-                aln_str0 = alignment[0].t_aln_str
+                #aln_str1 = alignment[0].q_aln_str
+                #aln_str0 = alignment[0].t_aln_str
 
             DWA.free_alignment(alignment)
 
