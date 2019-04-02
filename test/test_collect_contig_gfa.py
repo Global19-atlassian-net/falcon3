@@ -210,7 +210,7 @@ def test_main_3(tmpdir, capsys):
 
     # Adjust the expected results.
     # Remove any node not in the whitelist.
-    blacklist_nodes = [key for key in (p_ctg_tps.keys() + a_ctg_tps.keys()) if key not in only_these_contigs]
+    blacklist_nodes = [key for key in (list(p_ctg_tps.keys()) + list(a_ctg_tps.keys())) if key not in only_these_contigs]
     for key in blacklist_nodes:
         expected['nodes'].pop(key, None)
     # Remove any edge not in the whitelist.

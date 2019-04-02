@@ -10,12 +10,12 @@ def test_io_se1331():
     """
     x = ''
     cmd = 'seq 20000'
-    beg = time.clock()
+    beg = time.process_time()
     reader = M.CapturedProcessReaderContext(cmd)
     with reader:
         for line in reader.readlines():
             x += line
-    end = time.clock()
+    end = time.process_time()
     assert end-beg < 1
 
 

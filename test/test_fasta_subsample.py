@@ -34,7 +34,7 @@ ACTG
         'genome_size': 2,
         'strategy': mod.STRATEGY_RANDOM,
 
-        'exp_whitelist': '["synthetic/2"]',
+        'exp_whitelist': '["synthetic/1"]',
         'exp_all': '[["synthetic/1", 28], ["synthetic/2", 4]]',
         'exp_stats': ''
     },
@@ -71,7 +71,7 @@ ACGTACGTAAAAAAAAAAAA
         'genome_size': 10,
         'strategy': mod.STRATEGY_RANDOM,
 
-        'exp_whitelist': '["synthetic/2", "synthetic/4"]',
+        'exp_whitelist': '["synthetic/2", "synthetic/3", "synthetic/5"]',
         'exp_all': '[["synthetic/1", 9], ["synthetic/2", 21], ["synthetic/3", 9], ["synthetic/4", 15], ["synthetic/5", 20]]',
         'exp_stats': ''
     },

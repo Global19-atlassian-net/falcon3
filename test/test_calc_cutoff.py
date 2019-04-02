@@ -25,7 +25,7 @@ def test_calc_cutoff(capsys):
     assert not err
 
 
-expected_err = """
+expected_err = """\
 GenomeCoverageError: Not enough reads available for desired genome coverage (bases needed=23 > actual=22)
 User-provided genome_size: 1
 Desired coverage: 23.0

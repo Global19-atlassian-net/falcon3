@@ -322,19 +322,19 @@ size =      65536 cutoff =         5 all = 1
 def test_dazzler_get_nblocks():
     assert 2 == f.dazzler_get_nblocks(io.StringIO(sample_db))
 
-from falcon_kit.util import io
+from falcon_kit.util import io as iou
 
 
 def test_splitlines_iter():
     for text in ['', 'a', 'a\n', 'a\nb', 'a\nb\nc', 'a\nb\nc\n', '\n', '\na', '\na\n']:
-        assert list(io.splitlines_iter(text)) == list(text.splitlines())
+        assert list(iou.splitlines_iter(text)) == list(text.splitlines())
 
 
 def test_Readers():
-    reader = io.CapturedProcessReaderContext('echo "hi\nthere"')
+    reader = iou.CapturedProcessReaderContext('echo "hi\nthere"')
     with reader:
         assert ['hi', 'there'] == list(reader.readlines())
-    reader = io.StreamedProcessReaderContext('echo "hi\nthere"')
+    reader = iou.StreamedProcessReaderContext('echo "hi\nthere"')
     with reader:
         assert ['hi', 'there'] == list(reader.readlines())
 
