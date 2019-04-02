@@ -4,7 +4,7 @@ import helpers
 import pytest
 import os
 from falcon_kit.FastaReader import open_fasta_reader
-import cStringIO
+import io
 import json
 import falcon_kit.mains.fasta_filter as fasta_filter
 

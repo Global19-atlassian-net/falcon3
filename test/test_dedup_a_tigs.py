@@ -13,7 +13,7 @@ def test_help():
 def test_main_1(tmpdir, capsys):
     random.seed(1234567)
 
-    dummy_seq_001_00 = ''.join([random.choice('ACTG') for i in xrange(45000)])
+    dummy_seq_001_00 = ''.join([random.choice('ACTG') for i in range(45000)])
     dummy_seq_001_01 = dummy_seq_001_00[0:20000] + dummy_seq_001_00[25000:]
 
     dummy_seq_002_00 = dummy_seq_001_00
@@ -65,7 +65,7 @@ def test_main_2(tmpdir, capsys):
     random.seed(1234567)
 
     # Generate a dummy sequence.
-    dummy_seq = ''.join([random.choice('ACTG') for i in xrange(300000)])
+    dummy_seq = ''.join([random.choice('ACTG') for i in range(300000)])
     fasta_lines = [
                     # Base sequence.
                     '>000000F-001-00 000000217:E 000000056:E 46974 1268418 33 0 1.00 1.00',
@@ -104,7 +104,7 @@ def test_main_3(tmpdir, capsys):
     random.seed(1234567)
 
     # Generate a dummy sequence.
-    dummy_seq = ''.join([random.choice('ACTG') for i in xrange(300)])
+    dummy_seq = ''.join([random.choice('ACTG') for i in range(300)])
     fasta_lines = [
                     # Base sequence.
                     '>000000F-001-00 000000217:E 000000056:E 46974 1268418 33 0 1.00 1.00',
@@ -148,8 +148,8 @@ def test_main_4(tmpdir, capsys):
     random.seed(1234567)
 
     # Generate a dummy sequence.
-    dummy_seq_1 = ''.join([random.choice('AC') for i in xrange(3000)])
-    dummy_seq_2 = ''.join([random.choice('GT') for i in xrange(3000)])
+    dummy_seq_1 = ''.join([random.choice('AC') for i in range(3000)])
+    dummy_seq_2 = ''.join([random.choice('GT') for i in range(3000)])
     fasta_lines = [
                     # Base sequence.
                     '>000000F-001-00 000000217:E 000000056:E 46974 1268418 33 0 1.00 1.00',

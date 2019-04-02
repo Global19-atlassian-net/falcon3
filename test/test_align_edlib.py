@@ -11,7 +11,7 @@ def test_get_aln_results_1():
     Test aligning identical sequences.
     """
 
-    ref_seq = ''.join([random.choice('ACTG') for i in xrange(45000)])
+    ref_seq = ''.join([random.choice('ACTG') for i in range(45000)])
     query_seq = ref_seq
     min_seq_len = 2000
 
@@ -26,7 +26,7 @@ def test_get_aln_results_2():
     Test aligning non-identical sequences.
     """
 
-    ref_seq = ''.join([random.choice('ACTG') for i in xrange(45000)])
+    ref_seq = ''.join([random.choice('ACTG') for i in range(45000)])
     query_seq = ref_seq[0:20000] + ref_seq[25000:]
     min_seq_len = 2000
 
@@ -43,7 +43,7 @@ def test_get_aln_results_3():
     returns without alignment (since the sequences are too big).
     """
 
-    ref_seq = ''.join([random.choice('ACTG') for i in xrange(300000)])
+    ref_seq = ''.join([random.choice('ACTG') for i in range(300000)])
     query_seq = ref_seq
     min_seq_len = 2000
 
@@ -61,7 +61,7 @@ def test_get_aln_results_4():
     even if it was a duplicate.
     """
 
-    ref_seq = ''.join([random.choice('ACTG') for i in xrange(300)])
+    ref_seq = ''.join([random.choice('ACTG') for i in range(300)])
     query_seq = ref_seq
     min_seq_len = 2000
 
@@ -76,7 +76,7 @@ def test_get_aln_results_5():
     The DW alignment has a 100bp minimum distance threshold for (e1 - s1) and (e2 - s2).
     """
 
-    ref_seq = ''.join([random.choice('ACTG') for i in xrange(90)])
+    ref_seq = ''.join([random.choice('ACTG') for i in range(90)])
     query_seq = ref_seq
     min_seq_len = 50
 
@@ -91,8 +91,8 @@ def test_get_aln_results_6():
     Align two completely different sequences.
     """
 
-    ref_seq = ''.join([random.choice('AC') for i in xrange(3000)])
-    query_seq = ''.join([random.choice('GT') for i in xrange(3000)])
+    ref_seq = ''.join([random.choice('AC') for i in range(3000)])
+    query_seq = ''.join([random.choice('GT') for i in range(3000)])
     min_seq_len = 2000
 
     result = mod.get_aln_results(ref_seq, query_seq, min_seq_len)
@@ -108,7 +108,7 @@ def test_get_global_aln_results_1():
     Test aligning identical sequences.
     """
 
-    ref_seq = ''.join([random.choice('ACTG') for i in xrange(45000)])
+    ref_seq = ''.join([random.choice('ACTG') for i in range(45000)])
     query_seq = ref_seq
     min_seq_len = 2000
 
@@ -124,7 +124,7 @@ def test_get_global_aln_results_2():
     compared to ref.
     """
 
-    ref_seq = ''.join([random.choice('ACTG') for i in xrange(45000)])
+    ref_seq = ''.join([random.choice('ACTG') for i in range(45000)])
     query_seq = ref_seq[0:20000] + ref_seq[25000:]
     min_seq_len = 2000
 
@@ -140,7 +140,7 @@ def test_get_global_aln_results_3():
     compared to ref.
     """
 
-    query_seq = ''.join([random.choice('ACTG') for i in xrange(45000)])
+    query_seq = ''.join([random.choice('ACTG') for i in range(45000)])
     ref_seq = query_seq[0:20000] + query_seq[25000:]
     min_seq_len = 2000
 
@@ -156,7 +156,7 @@ def test_get_global_aln_results_4():
     Edlib is good with memory, and should align this easily.
     """
 
-    ref_seq = ''.join([random.choice('ACTG') for i in xrange(300000)])
+    ref_seq = ''.join([random.choice('ACTG') for i in range(300000)])
     query_seq = ref_seq
     min_seq_len = 2000
 
@@ -174,7 +174,7 @@ def test_get_global_aln_results_5():
     even if it was a duplicate.
     """
 
-    ref_seq = ''.join([random.choice('ACTG') for i in xrange(300)])
+    ref_seq = ''.join([random.choice('ACTG') for i in range(300)])
     query_seq = ref_seq
     min_seq_len = 2000
 
@@ -190,7 +190,7 @@ def test_get_global_aln_results_6():
     However, Edlib does not have any such constraints.
     """
 
-    ref_seq = ''.join([random.choice('ACTG') for i in xrange(90)])
+    ref_seq = ''.join([random.choice('ACTG') for i in range(90)])
     query_seq = ref_seq
     min_seq_len = 50
 
@@ -207,8 +207,8 @@ def test_get_global_aln_results_7():
     the global alignment is applied.
     """
 
-    ref_seq = ''.join([random.choice('AC') for i in xrange(3000)])
-    query_seq = ''.join([random.choice('GT') for i in xrange(3000)])
+    ref_seq = ''.join([random.choice('AC') for i in range(3000)])
+    query_seq = ''.join([random.choice('GT') for i in range(3000)])
     min_seq_len = 2000
 
     result = mod.get_global_aln_results(ref_seq, query_seq, min_seq_len)

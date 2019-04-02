@@ -5,7 +5,7 @@ import collections
 import logging
 import os
 import re
-import StringIO
+import io
 
 thisdir = os.path.dirname(os.path.abspath(__file__))
 example_HPCdaligner_fn = os.path.join(thisdir, 'HPCdaligner_synth0_new.sh')
@@ -320,7 +320,7 @@ size =      65536 cutoff =         5 all = 1
         50        50
 """
 def test_dazzler_get_nblocks():
-    assert 2 == f.dazzler_get_nblocks(StringIO.StringIO(sample_db))
+    assert 2 == f.dazzler_get_nblocks(io.StringIO(sample_db))
 
 from falcon_kit.util import io
 

@@ -2,7 +2,7 @@ import falcon_kit.tiling_path as mod
 import helpers
 import pytest
 import os
-from StringIO import StringIO
+from io import StringIO
 
 ######################################################
 # Define an example input test dataset which will be reused.
@@ -21,7 +21,7 @@ test_1_expected_coord_map = {
                         '000002F': {'000014727:E': 0, '000024020:E': 5238, '000060868:E': 8473},
                             }
 test_1_expected_contig_len = { '000000F': 45201, '000001F': 33726, '000002F': 8473 }
-test_1_input_tp_as_text = '\n'.join([val for key, val in test_1_lines.iteritems()])
+test_1_input_tp_as_text = '\n'.join([val for key, val in test_1_lines.items()])
 
 ######################################################
 # Define a new dest dataset for testing placement,
@@ -80,7 +80,7 @@ def test_tiling_path_1():
     #     the dump_as_split_lines() which should reconstruct the original input line.
     #   - TilingPath has a method `dump_as_split_lines` which returns all such
     #     split lines.
-    for key, lines in test_1_lines.iteritems():
+    for key, lines in test_1_lines.items():
         sl = [line.strip().split() for line in lines.splitlines()]
         assert(result[key].dump_as_split_lines() == sl)
 
@@ -116,7 +116,7 @@ def test_tiling_path_2():
     # Validate.
     assert(sorted(result.keys()) == ['000000F', '000001F', '000002F'])
 
-    for key, lines in test_1_lines.iteritems():
+    for key, lines in test_1_lines.items():
         sl = [line.strip().split() for line in lines.splitlines()]
         assert(result[key].dump_as_split_lines() == sl)
 
@@ -130,7 +130,7 @@ def test_tiling_path_2():
     offset = contig_lens['000002F'] - 8473
     assert(result['000002F'].coords == {'000014727:E': 0 + offset, '000024020:E': 5238 + offset, '000060868:E': 8473 + offset})
 
-    for key, tp in result.iteritems():
+    for key, tp in result.items():
         assert(tp.contig_len == contig_lens[key])
 
     assert(result['000000F'].v_to_edge == {'000092122:B': 0, '000081654:B': 1, '000034462:B': 2})
@@ -156,7 +156,7 @@ def test_tiling_path_3():
     # Validate.
     assert(sorted(result.keys()) == ['000000F', '000002F'])
 
-    for key in result.keys():
+    for key in list(result.keys()):
         lines = test_1_lines[key]
         sl = [line.strip().split() for line in lines.splitlines()]
         assert(result[key].dump_as_split_lines() == sl)
@@ -167,7 +167,7 @@ def test_tiling_path_3():
     offset = contig_lens['000002F'] - 8473
     assert(result['000002F'].coords == {'000014727:E': 0 + offset, '000024020:E': 5238 + offset, '000060868:E': 8473 + offset})
 
-    for key, tp in result.iteritems():
+    for key, tp in result.items():
         assert(tp.contig_len == contig_lens[key])
 
     assert(result['000000F'].v_to_edge == {'000092122:B': 0, '000081654:B': 1, '000034462:B': 2})
@@ -186,7 +186,7 @@ def test_tiling_path_4_expect_crash():
     test_3_lines['000000F'] = test_1_lines['000000F'] + """\n000000F 000062240:B 000083779:B 000083779 862 0 30696 99.79"""
     test_3_lines['000001F'] = test_1_lines['000001F']
     test_3_lines['000002F'] = test_1_lines['000002F']
-    test_3_input_tp_as_text = '\n'.join([val for key, val in test_3_lines.iteritems()])
+    test_3_input_tp_as_text = '\n'.join([val for key, val in test_3_lines.items()])
 
     fp_in = StringIO(test_3_input_tp_as_text)
 
@@ -212,7 +212,7 @@ def test_tiling_path_5(tmpdir):
     fp_in = StringIO(test_1_input_tp_as_text)
     expected = mod.load_tiling_paths_from_stream(fp_in, contig_lens=contig_lens, whitelist_seqs=whitelist_seqs)
 
-    assert(result.keys() == expected.keys())
+    assert(list(result.keys()) == list(expected.keys()))
 
     for key in result:
         result_tp = result[key]
@@ -249,7 +249,7 @@ def test_calc_node_coords_1():
     whitelist_seqs = None
     tps = mod.load_tiling_paths_from_stream(fp_in, contig_lens=contig_lens, whitelist_seqs=whitelist_seqs)
 
-    for key, tp in tps.iteritems():
+    for key, tp in tps.items():
         coord_map, contig_len = mod.calc_node_coords(tp.edges, first_node_offset=0)
         assert(coord_map == expected_coord_map[key])
         assert(contig_len == expected_contig_len[key])
@@ -297,7 +297,7 @@ def test_calc_node_coords_3():
     whitelist_seqs = None
     tps = mod.load_tiling_paths_from_stream(fp_in, contig_lens=contig_lens, whitelist_seqs=whitelist_seqs)
 
-    for key, tp in tps.iteritems():
+    for key, tp in tps.items():
         coord_map, contig_len = mod.calc_node_coords(tp.edges, first_node_offset=first_node_offset[key])
         assert(coord_map == expected_coord_map[key])
         assert(contig_len == expected_contig_len[key])
@@ -329,7 +329,7 @@ def test_find_a_ctg_placement_1():
 
     result = mod.find_a_ctg_placement(p_paths, a_paths)
 
-    for key, placement in result.iteritems():
+    for key, placement in result.items():
         assert(placement == test_placement_1_expected[key])
 
 def test_find_a_ctg_placement_2():
@@ -342,7 +342,7 @@ def test_find_a_ctg_placement_2():
 
     result = mod.find_a_ctg_placement(p_paths, a_paths)
 
-    assert(len(result.keys()) == 0)
+    assert(len(list(result.keys())) == 0)
 
 def test_find_a_ctg_placement_3():
     """

@@ -40,7 +40,7 @@ def test_help():
 #     return ret
 
 def generate_seq(seq_len):
-    return ''.join([random.choice(['A', 'C', 'T', 'G']) for i in xrange(seq_len)])
+    return ''.join([random.choice(['A', 'C', 'T', 'G']) for i in range(seq_len)])
 
 def setup_test(fp_p_ctg, fp_p_tp, fp_a_ctg, fp_a_tp):
     """
@@ -64,7 +64,7 @@ def setup_test(fp_p_ctg, fp_p_tp, fp_a_ctg, fp_a_tp):
 
     # Generate random p_ctg sequences write to file.
     p_ctg_fasta_text = ''
-    for key, tp in p_ctg_tps.iteritems():
+    for key, tp in p_ctg_tps.items():
         all_seqs[key] = generate_seq(tp.contig_len)
         p_ctg_fasta_text += '>%s\n%s\n' % (key, all_seqs[key])
     fp_p_ctg.write(p_ctg_fasta_text)
@@ -78,7 +78,7 @@ def setup_test(fp_p_ctg, fp_p_tp, fp_a_ctg, fp_a_tp):
 
     # Generate random p_ctg sequences write to file.
     a_ctg_fasta_text = ''
-    for key, tp in a_ctg_tps.iteritems():
+    for key, tp in a_ctg_tps.items():
         all_seqs[key] = generate_seq(tp.contig_len)
         a_ctg_fasta_text += '>%s\n%s\n' % (key, all_seqs[key])
     fp_a_ctg.write(a_ctg_fasta_text)
@@ -173,7 +173,7 @@ def test_main_2(tmpdir, capsys):
 
     # This test expects that the nodes are initialized with sequences, so
     # set the reference to the generated sequences here.
-    for key, node in expected['nodes'].iteritems():
+    for key, node in expected['nodes'].items():
         node['seq'] = all_seqs[key]
 
     argv = ['prog',
@@ -214,7 +214,7 @@ def test_main_3(tmpdir, capsys):
     for key in blacklist_nodes:
         expected['nodes'].pop(key, None)
     # Remove any edge not in the whitelist.
-    blacklist_edges = [key for key, edge in expected['edges'].iteritems() if edge['v'] not in only_these_contigs or edge['w'] not in only_these_contigs]
+    blacklist_edges = [key for key, edge in expected['edges'].items() if edge['v'] not in only_these_contigs or edge['w'] not in only_these_contigs]
     for key in blacklist_edges:
             expected['edges'].pop(key, None)
 

@@ -1,5 +1,5 @@
 import pytest
-import StringIO
+import io
 import falcon_kit.run_support as mod
 
 
@@ -7,7 +7,7 @@ def parse_config(content):
     """Used by tests.
     (Clean this code up later.)
     """
-    stream = StringIO.StringIO
+    stream = io.StringIO
     config = mod.parse_cfg_with_sections(stream(content))
     mod.update_defaults(config['General'])
     mod.check_config_sections(config)
@@ -104,7 +104,7 @@ def test_check_config_sections():
     assert int(config['job.step.pda']['njobs']) == 42
 
 def test_check_config_sections_foo():
-    config = mod.parse_cfg_with_sections(StringIO.StringIO(FC_RUN_CFG))
+    config = mod.parse_cfg_with_sections(io.StringIO(FC_RUN_CFG))
 
     import collections
     config['foo'] = collections.defaultdict(list)

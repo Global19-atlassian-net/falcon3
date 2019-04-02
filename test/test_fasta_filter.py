@@ -6,7 +6,7 @@ import helpers
 import pytest
 import os
 import sys
-import cStringIO
+import io
 import json
 
 def test_help():
@@ -331,16 +331,16 @@ A
 def check_run(func, fasta, expected, whitelist_set=None):
     if expected is None:
         return check_run_raises(func, fasta, whitelist_set)
-    fp_in = cStringIO.StringIO(fasta)
-    fp_out = cStringIO.StringIO()
+    fp_in = io.StringIO(fasta)
+    fp_out = io.StringIO()
     func(fp_in, fp_out, whitelist_set)
     if expected != fp_out.getvalue():
-        print(fp_out.getvalue())
+        print((fp_out.getvalue()))
     assert expected == fp_out.getvalue()
 
 def check_run_raises(func, fasta, whitelist_set=None):
-    fp_in = cStringIO.StringIO(fasta)
-    fp_out = cStringIO.StringIO()
+    fp_in = io.StringIO(fasta)
+    fp_out = io.StringIO()
     with pytest.raises(Exception) as e:
         func(fp_in, fp_out, whitelist_set)
     assert not isinstance(e.value, AssertionError) # Test assertions elsewhere.
@@ -364,7 +364,7 @@ def check_main_from_file_with_whitelist(cmd, fasta, expected, in_whitelist_file,
     assert(out == expected)
 
 def check_main_from_stdin(cmd, fasta, expected, capsys):
-    mod.sys.stdin = cStringIO.StringIO(fasta)
+    mod.sys.stdin = io.StringIO(fasta)
     argv = ['prog', cmd, '-']
     mod.main(argv)
     out, err = capsys.readouterr()
@@ -373,7 +373,7 @@ def check_main_from_stdin(cmd, fasta, expected, capsys):
     assert(out == expected)
 
 def check_main_from_stdin_with_whitelist(cmd, fasta, expected, in_whitelist_file, capsys):
-    mod.sys.stdin = cStringIO.StringIO(fasta)
+    mod.sys.stdin = io.StringIO(fasta)
     argv = ['prog', '--zmw-whitelist-fn',  in_whitelist_file, cmd, '-']
     mod.main(argv)
     out, err = capsys.readouterr()
@@ -387,7 +387,7 @@ def check_main_from_stdin_with_whitelist(cmd, fasta, expected, in_whitelist_file
 def test_yield_record_and_tokenized_headers():
     # We could delete this test, since we have whitelist tests also.
     # Or we could expand this.
-    fp_in = cStringIO.StringIO(fasta_tests[1])
+    fp_in = io.StringIO(fasta_tests[1])
     records = FastaReader.yield_fasta_record(fp_in, log=lambda x: None)
     w = set()
     assert [] == list(mod.yield_record_and_tokenized_headers(w, records))

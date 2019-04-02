@@ -1,4 +1,4 @@
-from cStringIO import StringIO
+from io import StringIO
 import sys
 import falcon_kit.mains.consensus as mod
 
@@ -58,26 +58,26 @@ def test_process_get_consensus_result(capsys):
     (out, err) = capsys.readouterr()
     lines = out.split('\n')
     expected = [
-        u'>prolog/10/0_2',
-        u'AA',
-        u'>prolog/11/0_2',
-        u'AA',
-        u'>prolog/12/0_2',
-        u'AA',
-        u'>prolog/13/0_2',
-        u'AA',
-        u'>prolog/14/0_2',
-        u'AA',
-        u'>prolog/15/0_2',
-        u'AA',
-        u'>prolog/16/0_2',
-        u'AA',
-        u'>prolog/17/0_2',
-        u'AA',
-        u'>prolog/18/0_2',
-        u'AA',
-        u'>prolog/19/0_2',
-        u'AA',
-        u'',
+        '>prolog/10/0_2',
+        'AA',
+        '>prolog/11/0_2',
+        'AA',
+        '>prolog/12/0_2',
+        'AA',
+        '>prolog/13/0_2',
+        'AA',
+        '>prolog/14/0_2',
+        'AA',
+        '>prolog/15/0_2',
+        'AA',
+        '>prolog/16/0_2',
+        'AA',
+        '>prolog/17/0_2',
+        'AA',
+        '>prolog/18/0_2',
+        'AA',
+        '>prolog/19/0_2',
+        'AA',
+        '',
     ]
     assert lines == expected

@@ -17,7 +17,7 @@ def test_main_1(tmpdir, capsys):
     """
     random.seed(1234567)
 
-    dummy_seq = ''.join([random.choice('ACTG') for i in xrange(500)])
+    dummy_seq = ''.join([random.choice('ACTG') for i in range(500)])
 
     fasta_lines = [
                    ]
@@ -53,7 +53,7 @@ def test_main_2(tmpdir, capsys):
     """
     random.seed(1234567)
 
-    dummy_seq = ''.join([random.choice('ACTG') for i in xrange(500)])
+    dummy_seq = ''.join([random.choice('ACTG') for i in range(500)])
 
     fasta_lines = [
                     '>000000F-001-01 000000123:E 000000078:E 46974 1268418 33 0 1.00 1.00',
@@ -120,7 +120,7 @@ def test_main_3(tmpdir, capsys):
     """
     random.seed(1234567)
 
-    dummy_seq = ''.join([random.choice('ACTG') for i in xrange(500)])
+    dummy_seq = ''.join([random.choice('ACTG') for i in range(500)])
 
     fasta_lines = [
                     '>000000F-001-01 000000123:E 000000078:E 46974 1268418 33 0 1.00 1.00',
@@ -161,7 +161,7 @@ def test_main_4(tmpdir, capsys):
     """
     random.seed(1234567)
 
-    dummy_seq = ''.join([random.choice('ACTG') for i in xrange(500)])
+    dummy_seq = ''.join([random.choice('ACTG') for i in range(500)])
 
     fasta_lines = [
                     '>000000F-001-01 000000123:E 000000078:E 46974 1268418 33 0 1.00 1.00',
@@ -207,7 +207,7 @@ def test_load_headers_1(tmpdir):
     """
     random.seed(1234567)
 
-    dummy_seq = ''.join([random.choice('ACTG') for i in xrange(500)])
+    dummy_seq = ''.join([random.choice('ACTG') for i in range(500)])
 
     fasta_lines = [
                     '>000000F-001-01 000000123:E 000000078:E 46974 1268418 33 0 1.00 1.00',
@@ -235,7 +235,7 @@ def test_load_headers_2(tmpdir):
     """
     random.seed(1234567)
 
-    dummy_seq = ''.join([random.choice('ACTG') for i in xrange(500)])
+    dummy_seq = ''.join([random.choice('ACTG') for i in range(500)])
 
     fasta_lines = [
                     '>000000F-001-01 000000123:E 000000078:E 46974 1268418 33 0 1.00 1.00',
@@ -264,7 +264,7 @@ def test_load_headers_3(tmpdir):
     """
     random.seed(1234567)
 
-    dummy_seq = ''.join([random.choice('ACTG') for i in xrange(500)])
+    dummy_seq = ''.join([random.choice('ACTG') for i in range(500)])
 
     fasta_lines = [
                   ]
