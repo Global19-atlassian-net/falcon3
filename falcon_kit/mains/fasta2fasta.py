@@ -1,4 +1,3 @@
-#!/usr/bin/env python2.7
 """A pre-processor for DAZZ_DB/fasta2DB.
 
 Since fasta2DB has several constraints
@@ -11,9 +10,6 @@ Currently, we ignore zmw numbers and instead use a global counter.
 Inputs may be compressed, and may be either fasta or fastq.
 (For now, we ignore QVs.)
 """
-
-
-
 from future.utils import itervalues
 from builtins import object
 from ..util.system import abs_fns

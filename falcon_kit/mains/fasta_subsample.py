@@ -1,4 +1,3 @@
-#!/usr/bin/env python2.7
 """
 Performs a single pass over an input FASTA/FOFN, and collects
 all ZMWs. For each ZMW it calculates the expected molecular size by picking

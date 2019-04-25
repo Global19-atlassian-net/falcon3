@@ -1,5 +1,3 @@
-#! /usr/bin/env python2.7
-
 import falcon_kit.FastaReader as FastaReader
 
 import os

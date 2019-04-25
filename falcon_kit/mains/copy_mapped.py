@@ -1,7 +1,3 @@
-#!/bin/env python2.7
-
-
-
 from future.utils import viewitems
 
 import argparse
