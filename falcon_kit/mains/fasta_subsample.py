@@ -36,7 +36,7 @@ def strategy_func_random(zmws):
     >>> random.seed(12345); strategy_func_random([('synthetic/1', 9)])
     [('synthetic/1', 9)]
     >>> random.seed(12345); strategy_func_random([('synthetic/1', 9), ('synthetic/2', 21), ('synthetic/3', 9), ('synthetic/4', 15), ('synthetic/5', 20)])
-    [('synthetic/2', 21), ('synthetic/4', 15), ('synthetic/5', 20), ('synthetic/1', 9), ('synthetic/3', 9)]
+    [('synthetic/5', 20), ('synthetic/3', 9), ('synthetic/2', 21), ('synthetic/1', 9), ('synthetic/4', 15)]
     """
     ret = copy.deepcopy(zmws)
     random.shuffle(ret)
