@@ -14,17 +14,17 @@ from . import io
 LOG = logging.getLogger(__name__)
 
 TASK_GENERIC_RUN_UNITS_SCRIPT = """\
-python -m falcon_kit.mains.generic_run_units_of_work --nproc={params.pypeflow_nproc} --units-of-work-fn={input.units_of_work} --bash-template-fn={input.bash_template} --results-fn={output.results}
+python3 -m falcon_kit.mains.generic_run_units_of_work --nproc={params.pypeflow_nproc} --units-of-work-fn={input.units_of_work} --bash-template-fn={input.bash_template} --results-fn={output.results}
 """
 TASK_GENERIC_SCATTER_ONE_UOW_SCRIPT = """\
-python -m falcon_kit.mains.generic_scatter_one_uow --all-uow-list-fn={input.all} --one-uow-list-fn={output.one} --split-idx={params.split_idx}
+python3 -m falcon_kit.mains.generic_scatter_one_uow --all-uow-list-fn={input.all} --one-uow-list-fn={output.one} --split-idx={params.split_idx}
 """
 TASK_GENERIC_UNSPLIT_SCRIPT = """
-python -m falcon_kit.mains.generic_unsplit --result-fn-list-fn={output.result_fn_list} --gathered-fn={output.gathered}
+python3 -m falcon_kit.mains.generic_unsplit --result-fn-list-fn={output.result_fn_list} --gathered-fn={output.gathered}
 """
 #TASK_GENERIC_CHUNKING_SCRIPT = """\
 # This is done via pbtag now, I think.
-#python -m falcon_kit.mains.generic_chunking split-fn={input.split} --bash-template-temp-fn={input.bash_template_temp} --units-of-work-fn={output.units_of_work} --uow-template-fn={output.uow_template} --split-idx={params.split_idx}
+#python3 -m falcon_kit.mains.generic_chunking split-fn={input.split} --bash-template-temp-fn={input.bash_template_temp} --units-of-work-fn={output.units_of_work} --uow-template-fn={output.uow_template} --split-idx={params.split_idx}
 #"""
 
 

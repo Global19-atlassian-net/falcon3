@@ -115,10 +115,10 @@ rm -f {db}.db {db}.dam .{db}.* # in case of re-run
 zmw_whitelist_option=""
 use_subsampling={use_subsampling}
 if [[ $use_subsampling -eq 1 ]]; then
-    python -m falcon_kit.mains.fasta_subsample --coverage "{subsample_coverage}" --random-seed "{subsample_random_seed}" --strategy "{subsample_strategy}" --genome-size "{genome_size}" "{input_fofn_fn}" zmw
+    python3 -m falcon_kit.mains.fasta_subsample --coverage "{subsample_coverage}" --random-seed "{subsample_random_seed}" --strategy "{subsample_strategy}" --genome-size "{genome_size}" "{input_fofn_fn}" zmw
     zmw_whitelist_option="--zmw-whitelist-fn zmw.whitelist.json"
 fi
-while read fn; do  {cat_fasta} ${{fn}} | python -m falcon_kit.mains.fasta_filter ${{zmw_whitelist_option}} {fasta_filter_option} - | fasta2DB -v {db} -i${{fn##*/}}; done < {input_fofn_fn}
+while read fn; do  {cat_fasta} ${{fn}} | python3 -m falcon_kit.mains.fasta_filter ${{zmw_whitelist_option}} {fasta_filter_option} - | fasta2DB -v {db} -i${{fn##*/}}; done < {input_fofn_fn}
 #cat fc.fofn | xargs rm -f
 {DBdust}
 """.format(**params)
@@ -600,7 +600,7 @@ def _get_rep_daligner_split_noop_scripts(db_fn):
     lines = []
     for i in range(1, nblocks+1):
         las_fn = '{db}.{i}.{db}.{i}.las'.format(db=dbname, i=i)
-        lines.append('python -m falcon_kit.mains.las_write_empty {}'.format(las_fn))
+        lines.append('python3 -m falcon_kit.mains.las_write_empty {}'.format(las_fn))
     script = '\n'.join(lines)
     return [script]
 

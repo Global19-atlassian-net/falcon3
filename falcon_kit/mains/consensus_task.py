@@ -107,7 +107,7 @@ def script_run_consensus(config, db_fn, las_fn, out_file_fn, nproc):
         LA4Falcon_flags += 'fo'
     if LA4Falcon_flags:
         LA4Falcon_flags = '-' + ''.join(set(LA4Falcon_flags))
-    run_consensus = "LA4Falcon -H$CUTOFF %s {db_fn} {las_fn} | python -m falcon_kit.mains.consensus {falcon_sense_option} >| {out_file_bfn}" % LA4Falcon_flags
+    run_consensus = "LA4Falcon -H$CUTOFF %s {db_fn} {las_fn} | python3 -m falcon_kit.mains.consensus {falcon_sense_option} >| {out_file_bfn}" % LA4Falcon_flags
 
     if config.get('dazcon', False):
         run_consensus = """

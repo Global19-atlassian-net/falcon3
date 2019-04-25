@@ -372,7 +372,7 @@ def get_parser():
 Typically:
     mkdir mydir/
     cd mydir/
-    python -m falcon_kit.mains.hgap4_adapt --job-output-dir=../job_output/
+    python3 -m falcon_kit.mains.hgap4_adapt --job-output-dir=../job_output/
 
     fc_run fc_run.cfg          -- (A)
     fc_unzip.py fc_unzip.cfg   -- (B)
