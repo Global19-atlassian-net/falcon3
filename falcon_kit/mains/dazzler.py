@@ -861,8 +861,8 @@ def daligner_combine(db_fn, gathered_fn, las_paths_fn):
     try:
         las_paths = sorted(find_las_paths(), key=lambda fn: os.path.basename(fn))
     except MissingLas as exc:
-        LOG.info('{}\nNot enough .las found from {!r}. Sleeping {} seconds before retrying.'.format(
-            exc.message, gathered_fn, WAIT))
+        LOG.exception('Not enough .las found from {!r}. Sleeping {} seconds before retrying.'.format(
+            gathered_fn, WAIT))
         time.sleep(WAIT)
         las_paths = find_las_paths()
     io.serialize(las_paths_fn, las_paths)
