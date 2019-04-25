@@ -22,7 +22,7 @@ def test_calc_cutoff(capsys):
     mod.main('prog --coverage 14 1 {}'.format(partial_capture_fn).split())
     out, err = capsys.readouterr()
     assert out == '2'
-    assert not err
+    assert err == ''
 
 
 expected_err = """\

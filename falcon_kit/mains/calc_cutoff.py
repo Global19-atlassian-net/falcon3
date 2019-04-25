@@ -36,8 +36,15 @@ we will write errors there in addition to stderr.
     args = parser.parse_args(argv[1:])
 
     target = int(args.genome_size * args.coverage)
-    capture = open(args.capture) if args.capture != '-' else sys.stdin
-    stats = capture.read()
+    def capture():
+        # This generator ensures that our file is closed at end-of-program.
+        if args.capture != '-':
+            with open(args.capture) as sin:
+                yield sin
+        else:
+            yield sys.stdin
+    for sin in capture():
+        stats = sin.read()
     try:
         cutoff = f.calc_cutoff(target, stats)
     except Exception:
