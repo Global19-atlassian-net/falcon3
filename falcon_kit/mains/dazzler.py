@@ -127,7 +127,7 @@ def script_length_cutoff(config, db, length_cutoff_fn='length_cutoff'):
     params = dict(config)
     length_cutoff = config['user_length_cutoff']
     if int(length_cutoff) < 0:
-        bash_cutoff = '$(python2.7 -m falcon_kit.mains.calc_cutoff --coverage {} {} <(DBstats -b1 {}))'.format(
+        bash_cutoff = '$(python3 -m falcon_kit.mains.calc_cutoff --coverage {} {} <(DBstats -b1 {}))'.format(
             params['seed_coverage'], params['genome_size'], db)
     else:
         bash_cutoff = '{}'.format(length_cutoff)
