@@ -13,9 +13,9 @@ MY_TEST_FLAGS?=-v -s --durations=0
 DOCTEST_MODULES= falcon_kit/functional.py falcon_kit/mains/consensus_task.py falcon_kit/mains/fasta_filter.py falcon_kit/mains/fasta_subsample.py falcon_kit/FastaReader.py
 
 install-edit:
-	pip3 -v install --user  --find-links=${WHEELHOUSE} --edit .
+	pip3 install --user  --find-links=${WHEELHOUSE} --edit .
 install: wheel
-	pip3 -v install --user --use-wheel --find-links=dist/ .
+	pip3 install --user --use-wheel --find-links=dist/ .
 pylint:
 	pylint --extension-pkg-whitelist=edlib --errors-only falcon_kit/
 test:

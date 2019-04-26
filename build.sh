@@ -40,7 +40,7 @@ make install-edit
 export MY_TEST_FLAGS="-v -s --durations=0 --cov=falcon_kit --cov-report=term-missing --cov-report=xml:coverage.xml --cov-branch"
 make test
 
-pip3 install --user --find-links=${WHEELHOUSE} pylint
+pip3 install --user --find-links=${WHEELHOUSE} pylint wheel
 make pylint
 
 bash bamboo_wheel.sh
