@@ -920,9 +920,12 @@ def ichunked(seq, chunksize):
     https://stackoverflow.com/a/1335572
     """
     from itertools import chain, islice
-    it = iter(seq)
-    while True:
-        yield chain([next(it)], islice(it, chunksize-1))
+    try:
+        it = iter(seq)
+        while True:
+            yield chain([next(it)], islice(it, chunksize-1))
+    except StopIteration:
+        return
 
 def merge_apply(las_paths_fn, las_fn):
     """Merge the las files into one, a few at a time.
