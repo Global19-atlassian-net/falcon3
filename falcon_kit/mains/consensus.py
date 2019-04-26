@@ -130,7 +130,7 @@ def get_trimmed_seq(seq, s, e):
 
 def get_consensus_core(seqs, min_cov, K, min_idt, allow_external_mapping):
     seqs_ptr = (c_char_p * len(seqs))()
-    seqs_ptr[:] = [val.seq for val in seqs]
+    seqs_ptr[:] = [bytes(val.seq, encoding='ascii')  for val in seqs]
 
     all_seqs_mapped = False
 
@@ -162,10 +162,10 @@ def get_consensus_core(seqs, min_cov, K, min_idt, allow_external_mapping):
         return ''
     # assert consensus_data_ptr
     consensus = string_at(consensus_data_ptr[0].sequence)[:]
-    eff_cov = consensus_data_ptr[0].eff_cov[:len(consensus)]
+    #eff_cov = consensus_data_ptr[0].eff_cov[:len(consensus)]
     LOG.debug(' Freeing')
     falcon.free_consensus_data(consensus_data_ptr)
-    return consensus
+    return consensus.decode('ascii')
 
 def get_consensus_without_trim(c_input):
     seqs, seed_id, config = c_input
