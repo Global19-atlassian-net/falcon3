@@ -100,7 +100,7 @@ def syscall(cmd):
     Raise on non-zero exit-code.
     """
     LOG('$ {!r} >'.format(cmd))
-    output = sp.check_output(shlex.split(cmd))
+    output = sp.check_output(shlex.split(cmd), encoding='ascii')
     if not output:
         msg = '%r failed to produce any output.' % cmd
         LOG('WARNING: %s' % msg)
@@ -118,7 +118,7 @@ def streamlines(cmd):
     Note: We do not detect a failure in the underlying process.
     """
     LOG('$ %s |' % cmd)
-    proc = sp.Popen(shlex.split(cmd), stdout=sp.PIPE)
+    proc = sp.Popen(shlex.split(cmd), stdout=sp.PIPE, encoding='ascii')
     return proc.stdout
 
 
@@ -149,7 +149,7 @@ class ProcessReaderContext(object):
 
     def __enter__(self):
         LOG('{!r}'.format(self.cmd))
-        self.proc = sp.Popen(shlex.split(self.cmd), stdout=sp.PIPE, universal_newlines=True)
+        self.proc = sp.Popen(shlex.split(self.cmd), stdout=sp.PIPE, universal_newlines=True, encoding='ascii')
 
     def __exit__(self, etype, evalue, etb):
         if etype is None:
