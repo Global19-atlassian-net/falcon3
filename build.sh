@@ -43,4 +43,4 @@ make test
 pip3 install --user --find-links=${WHEELHOUSE} pylint
 make pylint
 
-#bash bamboo_wheel.sh ############
+bash bamboo_wheel.sh
