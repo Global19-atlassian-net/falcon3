@@ -235,9 +235,9 @@ msa_pos_t * get_msa_working_sapce(unsigned int max_t_len) {
 }
 
 void clean_msa_working_space( msa_pos_t * msa_array, unsigned int max_t_len) {
-    unsigned int i,j,k;
+    int i,j,k;
     align_tag_col_t * col;
-    for (i = 0; i < max_t_len; i++) {
+    for (i = 0; i < (int)max_t_len; i++) {
         for (j =0; j < msa_array[i]->max_delta + 1; j++) {
             for (k = 0; k < 5; k++ ) {
                 col = msa_array[i]->delta[j].base + k;
@@ -314,7 +314,7 @@ consensus_data * get_cns_from_align_tags( align_tags_t ** tag_seqs,
 
     // loop through every alignment
     //printf("XX %d\n", n_tag_seqs);
-    for (i = 0; i < n_tag_seqs; i++) {
+    for (i = 0; i < (seq_coor_t)n_tag_seqs; i++) {
 
         // for each alignment position, insert the alignment tag to msa_array
         for (j = 0; j < tag_seqs[i]->len; j++) {
@@ -375,7 +375,7 @@ consensus_data * get_cns_from_align_tags( align_tags_t ** tag_seqs,
 
         g_best_score = -1;
 
-        for (i = 0; i < t_len; i++) {  //loop through every template base
+        for (i = 0; i < (seq_coor_t)t_len; i++) {  //loop through every template base
             #ifdef DEBUG_DETAILED_VERBOSE
                 fprintf(stderr, "[get_cns_from_align_tags] 3.1a: starting i = %d / %d\n", i, t_len);
             #endif
@@ -514,7 +514,7 @@ consensus_data * get_cns_from_align_tags( align_tags_t ** tag_seqs,
     #endif
 
     // reverse the sequence
-    for (i = 0; i < index/2; i++) {
+    for (i = 0; i < (seq_coor_t)index/2; i++) {
         cns_str[i] = cns_str[i] ^ cns_str[index-i-1];
         cns_str[index-i-1] = cns_str[i] ^ cns_str[index-i-1];
         cns_str[i] = cns_str[i] ^ cns_str[index-i-1];
@@ -677,7 +677,7 @@ consensus_data * generate_consensus_from_mapping( char ** input_seq,
     unsigned int aln_clip_offset = 0;
     unsigned int seq_count = 0;
     unsigned int aligned_seq_count = 0;
-    kmer_match * kmer_match_ptr = NULL;
+    //kmer_match * kmer_match_ptr = NULL;
     aln_range * arange = NULL;
     alignment * aln = NULL;
     align_tags_t ** tags_list = NULL;
@@ -727,7 +727,7 @@ consensus_data * generate_consensus_from_mapping( char ** input_seq,
         // Find the first non-indel aligned base and offset the coordinates.
         seq_coor_t q_start = arange->s1;
         seq_coor_t t_start = arange->s2;
-        for (aln_clip_offset = 0; aln_clip_offset < aln->aln_str_size; ++aln_clip_offset) {
+        for (aln_clip_offset = 0; aln_clip_offset < (unsigned int)aln->aln_str_size; ++aln_clip_offset) {
             if (aln->t_aln_str[aln_clip_offset] != '-' && aln->q_aln_str[aln_clip_offset] != '-') {
                 break;
             }

@@ -99,7 +99,7 @@ void add_sequence ( seq_coor_t start,
     seq_coor_t kmer_mask;
 
     kmer_mask = 0;
-    for (i = 0; i < K; i++) {
+    for (i = 0; i < (seq_coor_t)K; i++) {
         kmer_mask <<= 2;
         kmer_mask |= 0x00000003;
     }
@@ -120,7 +120,7 @@ void add_sequence ( seq_coor_t start,
         }
     }
     kmer_bv = get_kmer_bitvector( sa + start, K);
-    for (i = 0; i < seq_len - K;  i++) {
+    for (i = 0; i < seq_len - (seq_coor_t)K;  i++) {
         //printf("%lu %lu\n", i, kmer_bv);
         //printf("lk before init: %lu %lu %lu\n", kmer_bv, lk[kmer_bv].start, lk[kmer_bv].last);
         if (lk[kmer_bv].start == INT_MAX) {
@@ -174,7 +174,7 @@ kmer_match * find_kmer_pos_for_seq( char * seq, seq_coor_t seq_len, unsigned int
     sa = calloc( seq_len, sizeof(base) );
 
     kmer_mask = 0;
-    for (i = 0; i < K; i++) {
+    for (i = 0; i < (seq_coor_t)K; i++) {
         kmer_mask <<= 2;
         kmer_mask |= 0x00000003;
     }
@@ -198,7 +198,7 @@ kmer_match * find_kmer_pos_for_seq( char * seq, seq_coor_t seq_len, unsigned int
 
     kmer_bv = get_kmer_bitvector(sa, K);
     half_K = K >> 1;
-    for (i = 0; i < seq_len - K;  i += half_K) {
+    for (i = 0; i < seq_len - (seq_coor_t)K;  i += half_K) {
         kmer_bv = get_kmer_bitvector(sa + i, K);
         if (lk[kmer_bv].start == INT_MAX) {  //for high count k-mers
             continue;
