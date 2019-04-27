@@ -234,6 +234,38 @@ def open_fasta_reader(fn, log=LOG.info):
     ofs.close()
 
 
+@contextlib.contextmanager
+def open_fasta_writer(fn, log=LOG.info):
+    """
+    fn: str - filename
+
+    Yield a writer, possibly compressing. This is not actually
+    fasta-specific, except it can also write Gene Myers "dexta".
+
+    Wraps as the default COLUMNS=60.
+
+    Example:
+
+        with open_fasta_reader(ifn) as rin:
+            with open_fasta_writer(ofn) as writer
+                for record in rin:
+                    writer.write(str(record))
+    """
+    filename = abspath(expanduser(fn))
+    if filename.endswith(".gz"):
+        ofs = gzip.open(filename, 'wb')
+    elif filename.endswith(".dexta"):
+        ofs = stream_stdout("dexta -vk -i", filename)
+    elif '-' == fn:
+        ofs = sys.stdout
+        filename = fn
+    else:
+        ofs = open(filename, 'w')
+
+    yield ofs
+    ofs.close()
+
+
 class FastaReader(object):
     """Deprecated, but should still work (with filenames).
     """
