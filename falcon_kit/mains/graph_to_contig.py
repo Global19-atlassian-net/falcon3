@@ -26,7 +26,6 @@ import argparse
 import logging
 import sys
 import networkx as nx
-#from pbcore.io import FastaReader
 from ..FastaReader import open_fasta_reader
 from ..io import open_progress
 
