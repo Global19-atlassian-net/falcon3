@@ -103,40 +103,40 @@ def open_progress(fn, mode='r', log=LOG.info):
     fp.finish()
 
 
-def read_as_msgpack(stream):
+def read_as_msgpack(bytestream):
     import msgpack
-    content = stream.read()
+    content = bytestream.read()
     log('  Read {} as msgpack'.format(eng(len(content))))
-    return msgpack.loads(content,
+    return msgpack.unpackb(content, raw=False,
             max_map_len=2**25,
             max_array_len=2**25,
     )
 
 
-def read_as_json(stream):
+def read_as_json(bytestream):
     import json
-    content = stream.read()
+    content = bytestream.read().decode('ascii')
     log('  Read {} as json'.format(eng(len(content))))
     return json.loads(content)
 
 
-def write_as_msgpack(stream, val):
+def write_as_msgpack(bytestream, val):
     import msgpack
-    content = msgpack.dumps(val)
+    content = msgpack.packb(val)
     log('  Serialized to {} as msgpack'.format(eng(len(content))))
-    stream.write(content)
+    bytestream.write(content)
 
 
-def write_as_json(stream, val):
+def write_as_json(bytestream, val):
     import json
-    content = json.dumps(val, indent=2, separators=(',', ': '))
+    content = json.dumps(val, indent=2, separators=(',', ': ')).encode('ascii')
     log('  Serialized to {} as json'.format(eng(len(content))))
-    stream.write(content)
+    bytestream.write(content)
 
 
 def deserialize(fn):
     log('Deserializing from {!r}'.format(fn))
-    with open(fn) as ifs:
+    with open(fn, 'rb') as ifs:
         log('  Opened for read: {!r}'.format(fn))
         if fn.endswith('.msgpack'):
             val = read_as_msgpack(ifs)
@@ -153,13 +153,13 @@ def serialize(fn, val):
     """
     log('Serializing {} records'.format(len(val)))
     mkdirs(os.path.dirname(fn))
-    with open(fn, 'w') as ofs:
+    with open(fn, 'wb') as ofs:
         log('  Opened for write: {!r}'.format(fn))
         if fn.endswith('.msgpack'):
             write_as_msgpack(ofs, val)
         elif fn.endswith('.json'):
             write_as_json(ofs, val)
-            ofs.write('\n') # for vim
+            ofs.write(b'\n') # for vim
         else:
             raise Exception('Unknown extension for {!r}'.format(fn))
 
