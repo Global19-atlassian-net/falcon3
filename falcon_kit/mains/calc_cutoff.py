@@ -3,6 +3,8 @@
 
 from .. import functional as f
 import argparse
+import uuid
+import json
 import os
 import sys
 import traceback
@@ -47,16 +49,29 @@ we will write errors there in addition to stderr.
         stats = sin.read()
     try:
         cutoff = f.calc_cutoff(target, stats)
-    except Exception:
-        msg = traceback.format_exc()
-        msg += 'User-provided genome_size: {}\nDesired coverage: {}\n'.format(
+    except Exception as e:
+        tb = traceback.format_exc()
+        msg = 'User-provided genome_size: {}\nDesired coverage: {}\n'.format(
             args.genome_size, args.coverage)
         # pbfalcon wants us to write errs here.
         errfile = os.environ.get('PBFALCON_ERRFILE')
         if errfile:
             with open(errfile, 'w') as ofs:
-                ofs.write(msg)
-        raise Exception(msg)
+                ofs.write(tb + msg)
+        # this is propagated to SMRT Link UI
+        # see PacBioAlarm class in pbcommand.models.common for details
+        with open("alarms.json", "w") as alarms_out:
+            alarms_out.write(json.dumps([
+                {
+                    "exception": e.__class__.__name__,
+                    "info": tb,
+                    "message": str(e) + "\n" + msg,
+                    "name": e.__class__.__name__,
+                    "severity": "ERROR",
+                    "owner": "python3",
+                    "id": str(uuid.uuid4())
+                }]))
+        raise Exception(tb + msg)
     sys.stdout.write(str(cutoff))
 
 
