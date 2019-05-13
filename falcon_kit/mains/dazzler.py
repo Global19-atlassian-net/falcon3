@@ -115,7 +115,8 @@ rm -f {db}.db {db}.dam .{db}.* # in case of re-run
 zmw_whitelist_option=""
 use_subsampling={use_subsampling}
 if [[ $use_subsampling -eq 1 ]]; then
-    python3 -m falcon_kit.mains.fasta_subsample --coverage "{subsample_coverage}" --random-seed "{subsample_random_seed}" --strategy "{subsample_strategy}" --genome-size "{genome_size}" "{input_fofn_fn}" zmw
+    while read fn; do  {cat_fasta} ${{fn}} | python3 -m falcon_kit.mains.zmw_collect; done < {input_fofn_fn} > zmw.all.tsv
+    cat zmw.all.tsv | python3 -m falcon_kit.mains.zmw_subsample --coverage "{subsample_coverage}" --random-seed "{subsample_random_seed}" --strategy "{subsample_strategy}" --genome-size "{genome_size}" zmw.whitelist.json
     zmw_whitelist_option="--zmw-whitelist-fn zmw.whitelist.json"
 fi
 while read fn; do  {cat_fasta} ${{fn}} | python3 -m falcon_kit.mains.fasta_filter ${{zmw_whitelist_option}} {fasta_filter_option} - | fasta2DB -v {db} -i${{fn##*/}}; done < {input_fofn_fn}
