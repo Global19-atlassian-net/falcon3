@@ -57,7 +57,7 @@ we will write errors there in addition to stderr.
         errfile = os.environ.get('PBFALCON_ERRFILE')
         if errfile:
             with open(errfile, 'w') as ofs:
-                ofs.write(tb + "\n" + msg)
+                ofs.write(tb + msg)
         # this is propagated to SMRT Link UI
         # see PacBioAlarm class in pbcommand.models.common for details
         with open("alarms.json", "w") as alarms_out:
@@ -71,7 +71,7 @@ we will write errors there in addition to stderr.
                     "owner": "python3",
                     "id": str(uuid.uuid4())
                 }]))
-        raise Exception(msg)
+        raise Exception(tb + msg)
     sys.stdout.write(str(cutoff))
 
 
