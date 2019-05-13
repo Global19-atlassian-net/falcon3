@@ -65,7 +65,7 @@ we will write errors there in addition to stderr.
                 {
                     "exception": e.__class__.__name__,
                     "info": tb,
-                    "message": e.message + "\n" + msg,
+                    "message": str(e) + "\n" + msg,
                     "name": e.__class__.__name__,
                     "severity": "ERROR",
                     "owner": "python3",
