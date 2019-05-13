@@ -69,7 +69,7 @@ we will write errors there in addition to stderr.
                     "name": e.__class__.__name__,
                     "severity": "ERROR",
                     "owner": "python3",
-                    "id": uuid.uuid4()
+                    "id": str(uuid.uuid4())
                 }]))
         raise Exception(msg)
     sys.stdout.write(str(cutoff))
