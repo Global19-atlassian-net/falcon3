@@ -59,6 +59,7 @@ we will write errors there in addition to stderr.
             with open(errfile, 'w') as ofs:
                 ofs.write(tb + "\n" + msg)
         # this is propagated to SMRT Link UI
+        # see PacBioAlarm class in pbcommand.models.common for details
         with open("alarms.json", "w") as alarms_out:
             alarms_out.write(json.dumps([
                 {
