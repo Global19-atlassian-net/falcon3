@@ -2,6 +2,7 @@
 
 
 from .. import functional as f
+import datetime
 import argparse
 import uuid
 import json
@@ -69,6 +70,7 @@ we will write errors there in addition to stderr.
                     "name": e.__class__.__name__,
                     "severity": "ERROR",
                     "owner": "python3",
+                    "createdAt": datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),
                     "id": str(uuid.uuid4())
                 }]))
         raise Exception(tb + msg)
