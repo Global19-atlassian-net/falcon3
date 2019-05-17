@@ -1,7 +1,6 @@
-
-
 import falcon_kit.mains.calc_cutoff as mod
 import helpers
+import json
 import os.path
 import pytest
 
@@ -25,8 +24,10 @@ def test_calc_cutoff(capsys):
     assert err == ''
 
 
-expected_err = """\
-GenomeCoverageError: Not enough reads available for desired genome coverage (bases needed=23 > actual=22)
+expected_err0 = """\
+Not enough reads available for desired genome coverage (bases needed=23 > actual=22)
+"""
+expected_err1 = """\
 User-provided genome_size: 1
 Desired coverage: 23.0
 """
@@ -38,7 +39,8 @@ def test_calc_cutoff_err():
     assert os.path.exists(partial_capture_fn)
     with pytest.raises(Exception) as excinfo:
         mod.main('prog --coverage 23 1 {}'.format(partial_capture_fn).split())
-    assert expected_err in str(excinfo.value)
+    #assert expected_err0 in str(excinfo.value)
+    assert expected_err1 in str(excinfo.value)
 
 
 def test_calc_cutoff_errfile(monkeypatch, tmpdir):
@@ -49,5 +51,13 @@ def test_calc_cutoff_errfile(monkeypatch, tmpdir):
     assert os.path.exists(partial_capture_fn)
     with pytest.raises(Exception) as excinfo:
         mod.main('prog --coverage 23 1 {}'.format(partial_capture_fn).split())
-    assert expected_err in str(excinfo.value)
-    assert expected_err in open(fn).read()
+    #assert expected_err0 in str(excinfo.value)
+    assert expected_err1 in str(excinfo.value)
+    assert expected_err0 in open(fn).read()
+    assert expected_err1 in open(fn).read()
+
+    # Also check new 'alarms.json'
+    encoded0 = json.dumps(expected_err0)[1:-1]  # actually just escapes the newlines
+    encoded1 = json.dumps(expected_err1)[1:-1]
+    assert encoded0 in open('alarms.json').read()
+    assert encoded1 in open('alarms.json').read()
