@@ -25,29 +25,9 @@ def run(genome_size, coverage, capture):
     try:
         cutoff = f.calc_cutoff(target, stats)
     except Exception as e:
-        tb = traceback.format_exc()
         msg = 'User-provided genome_size: {}\nDesired coverage: {}\n'.format(
             genome_size, coverage)
-        # pbfalcon wants us to write errs here.
-        errfile = os.environ.get('PBFALCON_ERRFILE')
-        if errfile:
-            with open(errfile, 'w') as ofs:
-                ofs.write(tb + msg)
-        # this is propagated to SMRT Link UI
-        # see PacBioAlarm class in pbcommand.models.common for details
-        with open("alarms.json", "w") as alarms_out:
-            alarms_out.write(json.dumps([
-                {
-                    "exception": e.__class__.__name__,
-                    "info": tb,
-                    "message": str(e) + "\n" + msg,
-                    "name": e.__class__.__name__,
-                    "severity": "ERROR",
-                    "owner": "python3",
-                    "createdAt": datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),
-                    "id": str(uuid.uuid4())
-                }]))
-        raise Exception(tb + msg)
+        raise Exception(msg) from e
     sys.stdout.write(str(cutoff))
 
 
@@ -78,7 +58,30 @@ we will write errors there in addition to stderr.
                         help='File with captured output of DBstats. (Otherwise, stdin.)')
     args = parser.parse_args(argv[1:])
 
-    run(**vars(args))
+    try:
+        run(**vars(args))
+    except Exception as e:
+        tb = traceback.format_exc()
+        # pbfalcon wants us to write errs here.
+        errfile = os.environ.get('PBFALCON_ERRFILE')
+        if errfile:
+            with open(errfile, 'w') as ofs:
+                ofs.write(tb)
+        # this is propagated to SMRT Link UI
+        # see PacBioAlarm class in pbcommand.models.common for details
+        with open("alarms.json", "w") as alarms_out:
+            alarms_out.write(json.dumps([
+                {
+                    "exception": e.__class__.__name__,
+                    "info": tb,
+                    "message": str(e) + "\n" + str(e.__cause__),
+                    "name": e.__class__.__name__,
+                    "severity": "ERROR",
+                    "owner": "python3",
+                    "createdAt": datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),
+                    "id": str(uuid.uuid4())
+                }]))
+        raise
 
 
 if __name__ == "__main__":
