@@ -1,5 +1,3 @@
-
-
 import falcon_kit.mains.calc_cutoff as mod
 import helpers
 import os.path
