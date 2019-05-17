@@ -57,7 +57,7 @@ def test_calc_cutoff_errfile(monkeypatch, tmpdir):
     assert expected_err1 in open(fn).read()
 
     # Also check new 'alarms.json'
-    encoded0 = json.dumps(expected_err0)[1:-1]
+    encoded0 = json.dumps(expected_err0)[1:-1]  # actually just escapes the newlines
     encoded1 = json.dumps(expected_err1)[1:-1]
     assert encoded0 in open('alarms.json').read()
     assert encoded1 in open('alarms.json').read()
