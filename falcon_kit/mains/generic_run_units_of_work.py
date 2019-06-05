@@ -86,9 +86,9 @@ def run(bash_template_fn, units_of_work_fn, nproc, nproc_per_uow,
     if nproc_per_uow < 1:
         LOG.error('nproc_per_uow == {} < 1; using 1 instead'.format(nproc_per_uow))
         nproc_per_uow = 1
-    inputs = list(yield_uows(units_of_work_fn, bash_template_fn, nproc_per_uow))
+    inputs = list(yield_uows(units_of_work_fn, bash_template_fn, nproc=nproc_per_uow))
 
-    njobs = (nproc // nproc_per_uow) if (nproc > 0) else (cpu_count() // nproc)
+    njobs = (nproc // nproc_per_uow) if (nproc > 0) else 0
     LOG.info('For multiprocessing, parallel njobs={} (cpu_count={}, nproc={}, nproc_per_uow={})'.format(
         njobs, cpu_count(), nproc, nproc_per_uow))
 
@@ -125,7 +125,7 @@ def parse_args(argv):
     )
     parser.add_argument(
         '--nproc', type=int, default=0,
-        help='Number of processors allowed to be used (0 => {}).'.format(cpu_count()))
+        help='Number of processors allowed to be used (0 => avoid multiprocessing module)')
     parser.add_argument(
         '--nproc-per-uow', type=int, default=1,
         help='Number of processors expected to be used by each units-of-work (num parallel procs will be nproc/nproc-per-uow)')
