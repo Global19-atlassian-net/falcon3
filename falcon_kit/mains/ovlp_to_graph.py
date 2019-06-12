@@ -1366,6 +1366,71 @@ def construct_c_path_from_utgs(ug, u_edge_data, sg):
         print("left over edges:", len(free_edges))
     return c_path
 
+def extract_contigs(ug, u_edge_data, c_path, circular_path):
+    free_edges = set()
+    for s, t, v in ug.edges(keys=True):
+        free_edges.add((s, t, v))
+
+    ctg_id = 0
+
+    for path_start, path_key, path_end, p_len, p_score, path, n_edges in c_path:
+        length = 0
+        score = 0
+        length_r = 0
+        score_r = 0
+
+        non_overlapped_path = []
+        non_overlapped_path_r = []
+        for s, t, v in path:
+            if v != "NA":
+                rs, rt, rv = reverse_end(t), reverse_end(s), reverse_end(v)
+            else:
+                rs, rt, rv = reverse_end(t), reverse_end(s), "NA"
+            if (s, t, v) in free_edges and (rs, rt, rv) in free_edges:
+                non_overlapped_path.append((s, t, v))
+                non_overlapped_path_r.append((rs, rt, rv))
+                length += u_edge_data[(s, t, v)][0]
+                score += u_edge_data[(s, t, v)][1]
+                length_r += u_edge_data[(rs, rt, rv)][0]
+                score_r += u_edge_data[(rs, rt, rv)][1]
+            else:
+                break
+
+        if len(non_overlapped_path) == 0:
+            continue
+        s0, t0, v0 = non_overlapped_path[0]
+        end_node = non_overlapped_path[-1][1]
+
+        c_type_ = "ctg_linear" if (end_node != s0) else "ctg_circular"
+
+        new_contig = ('%06dF' % ctg_id, c_type_, s0 + "~" + v0 + "~" + \
+                        t0, end_node, length, score, "|".join(
+                        [c[0] + "~" + c[2] + "~" + c[1] for c in non_overlapped_path]))
+        yield new_contig
+
+        non_overlapped_path_r.reverse()
+        s0, t0, v0 = non_overlapped_path_r[0]
+        end_node = non_overlapped_path_r[-1][1]
+
+        new_contig = ('%06dR' % ctg_id, c_type_, s0 + "~" + v0 + "~" + \
+                        t0, end_node, length_r, score_r, "|".join(
+                        [c[0] + "~" + c[2] + "~" + c[1] for c in non_overlapped_path_r]))
+        yield new_contig
+
+        ctg_id += 1
+        for e in non_overlapped_path:
+            if e in free_edges:
+                free_edges.remove(e)
+        for e in non_overlapped_path_r:
+            if e in free_edges:
+                free_edges.remove(e)
+
+    for s, t, v in list(circular_path):
+        length, score, path, type_ = u_edge_data[(s, t, v)]
+        new_contig = ('%6d' % ctg_id, "ctg_circular", s + \
+                        "~" + v + "~" + t, t, length, score, s + "~" + v + "~" + t)
+        yield new_contig
+        ctg_id += 1
 
 def ovlp_to_graph(args):
     # transitivity reduction, remove spurs, remove putative edges caused by repeats
@@ -1496,70 +1561,17 @@ def ovlp_to_graph(args):
     # contig construction from utgs
     c_path = construct_c_path_from_utgs(ug, u_edge_data, sg)
 
-    free_edges = set()
-    for s, t, v in ug.edges(keys=True):
-        free_edges.add((s, t, v))
-
-    ctg_id = 0
-
-    ctg_paths = open("ctg_paths", "w")
-
+    # Sorting contig paths by length.
     c_path.sort(key=lambda x: -x[3])
 
-    for path_start, path_key, path_end, p_len, p_score, path, n_edges in c_path:
-        length = 0
-        score = 0
-        length_r = 0
-        score_r = 0
+    # Construct the contigs (based on unitigs).
+    contigs = extract_contigs(ug, u_edge_data, c_path, circular_path)
 
-        non_overlapped_path = []
-        non_overlapped_path_r = []
-        for s, t, v in path:
-            if v != "NA":
-                rs, rt, rv = reverse_end(t), reverse_end(s), reverse_end(v)
-            else:
-                rs, rt, rv = reverse_end(t), reverse_end(s), "NA"
-            if (s, t, v) in free_edges and (rs, rt, rv) in free_edges:
-                non_overlapped_path.append((s, t, v))
-                non_overlapped_path_r.append((rs, rt, rv))
-                length += u_edge_data[(s, t, v)][0]
-                score += u_edge_data[(s, t, v)][1]
-                length_r += u_edge_data[(rs, rt, rv)][0]
-                score_r += u_edge_data[(rs, rt, rv)][1]
-            else:
-                break
-
-        if len(non_overlapped_path) == 0:
-            continue
-        s0, t0, v0 = non_overlapped_path[0]
-        end_node = non_overlapped_path[-1][1]
-
-        c_type_ = "ctg_linear" if (end_node != s0) else "ctg_circular"
-
-        print("%06dF" % ctg_id, c_type_, s0 + "~" + v0 + "~" + \
-            t0, end_node, length, score, "|".join(
-                [c[0] + "~" + c[2] + "~" + c[1] for c in non_overlapped_path]), file=ctg_paths)
-        non_overlapped_path_r.reverse()
-        s0, t0, v0 = non_overlapped_path_r[0]
-        end_node = non_overlapped_path_r[-1][1]
-        print("%06dR" % ctg_id, c_type_, s0 + "~" + v0 + "~" + \
-            t0, end_node, length_r, score_r, "|".join(
-                [c[0] + "~" + c[2] + "~" + c[1] for c in non_overlapped_path_r]), file=ctg_paths)
-        ctg_id += 1
-        for e in non_overlapped_path:
-            if e in free_edges:
-                free_edges.remove(e)
-        for e in non_overlapped_path_r:
-            if e in free_edges:
-                free_edges.remove(e)
-
-    for s, t, v in list(circular_path):
-        length, score, path, type_ = u_edge_data[(s, t, v)]
-        print("%6d" % ctg_id, "ctg_circular", s + \
-            "~" + v + "~" + t, t, length, score, s + "~" + v + "~" + t, file=ctg_paths)
-        ctg_id += 1
-
-    ctg_paths.close()
+    # Write contigs to file.
+    with open('ctg_paths', 'w') as fp_out:
+        for contig_tuple in contigs:
+            fp_out.write(' '.join([str(val) for val in contig_tuple]))
+            fp_out.write('\n')
 
 
 def main(argv=sys.argv):
