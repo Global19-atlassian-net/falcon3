@@ -133,10 +133,12 @@ time python3 -m falcon_kit.mains.collect_contig_gfa >| contig.gfa.json
 # Output the assembly pread graph.
 time python3 -m falcon_kit.mains.gen_gfa_v1 asm.gfa.json >| asm.gfa
 time python3 -m falcon_kit.mains.gen_gfa_v2 asm.gfa.json >| asm.gfa2
+time python3 -m falcon_kit.mains.gen_bandage_csv asm.gfa.json >| asm.csv
 
 # Output the string graph.
 time python3 -m falcon_kit.mains.gen_gfa_v1 sg.gfa.json >| sg.gfa
 time python3 -m falcon_kit.mains.gen_gfa_v2 sg.gfa.json >| sg.gfa2
+time python3 -m falcon_kit.mains.gen_bandage_csv sg.gfa.json >| sg.csv
 
 # Output the contig graph with associate contigs attached to each primary contig.
 time python3 -m falcon_kit.mains.gen_gfa_v2 contig.gfa.json >| contig.gfa2
