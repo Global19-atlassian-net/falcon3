@@ -81,6 +81,10 @@ def run_func(args):
 
 
 def system(call, check=False):
+    """Deprecated.
+    Prefer pypeflow.io.syscall()
+    """
+    LOG('DEPRECATED falcon_kit.util.io.system()')
     LOG('$(%s)' % repr(call))
     rc = os.system(call)
     msg = "Call %r returned %d." % (call, rc)
@@ -94,11 +98,15 @@ def system(call, check=False):
 
 
 def syscall(cmd):
-    """Return stdout, fully captured.
+    """Deprecated.
+    Prefer pypeflow.io.capture()
+
+    Return stdout, fully captured.
     Wait for subproc to finish.
     Raise if empty.
     Raise on non-zero exit-code.
     """
+    LOG('DEPRECATED falcon_kit.util.io.syscall()')
     LOG('$ {!r} >'.format(cmd))
     output = sp.check_output(shlex.split(cmd), encoding='ascii')
     if not output:
