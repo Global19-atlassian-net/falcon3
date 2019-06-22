@@ -36,6 +36,7 @@ def bam_split(bam_subreadset_fn):
     bam_paths = list(io.yield_abspath_from_fofn(fofn_fn))
     return bam_paths
 
+
 def bam2dexta_split(bam_subreadset_fn, wildcards, split_fn, bash_template_fn):
     assert bam_subreadset_fn.endswith('.xml')
     with open(bash_template_fn, 'w') as stream:
@@ -131,12 +132,6 @@ def cmd_apply(args):
 def cmd_combine(args):
     bam2dexta_combine(args.gathered_fn, args.dexta_fofn_fn)
 def cmd_split_apply_combine(args):
-    #bam_paths = bam_split(args.bam_subreadset_fn)
-    #dexta_paths = bam_apply_parallel(bam_paths, args.nproc)
-    #with open(args.dexta_fofn_fn, 'w') as sout:
-    #    for d in dexta_paths:
-    #        sout.write(f'{d}\n')
-
     wildcards = 'bam2dexta0_id'
     split_fn = 'bam2dexta-uows.json'
     bash_template_fn = 'bash-template.sh'
@@ -151,8 +146,6 @@ def cmd_split_apply_combine(args):
     generic_run_units_of_work.run(bash_template_fn, split_fn, args.nproc, nproc_per_uow,
         gathered_fn)
     bam2dexta_combine(gathered_fn, args.dexta_fofn_fn)
-
-#def bam_apply_parallel(bam_paths, nproc):
 
 
 #def get_ours(config_fn):
