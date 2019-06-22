@@ -22,11 +22,6 @@ def bam_split(bam_subreadset_fn):
     """
     split_dataset_prefix = os.path.join(os.getcwd(), 'split') # TODO: Test this as relative sub-dir.
 
-    ##from ..util import dataset_split # introduces pbcore dependency
-    ##bam_paths = dataset_split.split_dataset(bam_subreadset_fn, split_dataset_prefix)
-    #bam_paths = [bam_subreadset_fn] # Lose parallelism, but avoid pbcore.
-
-    # Better, if possible:
     cmd = f'python2 -m pbcore.io.dataset.run_split {bam_subreadset_fn} {split_dataset_prefix}'
     io.syscall(cmd)
 
