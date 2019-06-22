@@ -6,6 +6,7 @@ import os
 import re
 import sys
 import time
+from . import generic_run_units_of_work
 from .. import io, functional
 from .. import(
         bash,  # for write_sub_script
@@ -16,11 +17,9 @@ LOG = logging.getLogger()
 WAIT = 20 # seconds
 
 
-def bam2dexta_split(bam_subreadset_fn, wildcards, split_fn, bash_template_fn):
-    assert bam_subreadset_fn.endswith('.xml')
-    with open(bash_template_fn, 'w') as stream:
-        stream.write(pype_tasks.TASK_BAM2DEXTA_APPLY_SCRIPT)
-
+def bam_split(bam_subreadset_fn):
+    """Return list of bam-datasets which include the original filters.
+    """
     split_dataset_prefix = os.path.join(os.getcwd(), 'split') # TODO: Test this as relative sub-dir.
 
     ##from ..util import dataset_split # introduces pbcore dependency
@@ -29,6 +28,20 @@ def bam2dexta_split(bam_subreadset_fn, wildcards, split_fn, bash_template_fn):
 
     # Better, if possible:
     cmd = f'python2 -m pbcore.io.dataset.run_split {bam_subreadset_fn} {split_dataset_prefix}'
+    io.syscall(cmd)
+
+    # We could glob() the result, but we also have the exactly list in a FOFN,
+    # by convention in run_split().
+    fofn_fn = f'{split_dataset_prefix}.fofn'
+    bam_paths = list(io.yield_abspath_from_fofn(fofn_fn))
+    return bam_paths
+
+def bam2dexta_split(bam_subreadset_fn, wildcards, split_fn, bash_template_fn):
+    assert bam_subreadset_fn.endswith('.xml')
+    with open(bash_template_fn, 'w') as stream:
+        stream.write(pype_tasks.TASK_BAM2DEXTA_APPLY_SCRIPT)
+
+    bam_paths = bam_split(bam_subreadset_fn)
 
     jobs = list()
     for i, bam_fn in enumerate(bam_paths):
@@ -66,6 +79,7 @@ def bam2dexta_apply(bam_fn, dexta_fn):
     # Note: If 'dexta' fails, the script will error. So we might still have an empty foo.dexta, but
     # we will not have moved it to {dexta_fn}.
     io.syscall(cmd)
+
 
 def bam2dexta_combine(gathered_fn, dexta_fofn_fn):
     gathered = io.deserialize(gathered_fn)
@@ -116,6 +130,30 @@ def cmd_apply(args):
     bam2dexta_apply(args.bam_fn, args.dexta_fn)
 def cmd_combine(args):
     bam2dexta_combine(args.gathered_fn, args.dexta_fofn_fn)
+def cmd_split_apply_combine(args):
+    #bam_paths = bam_split(args.bam_subreadset_fn)
+    #dexta_paths = bam_apply_parallel(bam_paths, args.nproc)
+    #with open(args.dexta_fofn_fn, 'w') as sout:
+    #    for d in dexta_paths:
+    #        sout.write(f'{d}\n')
+
+    wildcards = 'bam2dexta0_id'
+    split_fn = 'bam2dexta-uows.json'
+    bash_template_fn = 'bash-template.sh'
+    gathered_fn = 'gathered.json'
+    nproc_per_uow = 1
+
+    bam2dexta_split(
+            args.bam_subreadset_fn,
+            wildcards,
+            split_fn, bash_template_fn,
+    )
+    generic_run_units_of_work.run(bash_template_fn, split_fn, args.nproc, nproc_per_uow,
+        gathered_fn)
+    bam2dexta_combine(gathered_fn, args.dexta_fofn_fn)
+
+#def bam_apply_parallel(bam_paths, nproc):
+
 
 #def get_ours(config_fn):
 #    ours = dict()
@@ -158,6 +196,15 @@ def add_combine_arguments(parser):
         '--dexta-fofn-fn', required=True,
         help='output. FOFN of dexta paths.')
 
+def add_split_apply_combine_arguments(parser):
+    parser.add_argument(
+        '--bam-subreadset-fn',
+        help='input. Dataset (.xml) of bam files of subreads.'
+    )
+    parser.add_argument(
+        '--dexta-fofn-fn', required=False, default='dexta.fofn',
+        help='output. FOFN of dexta paths.')
+
 class HelpF(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
     pass
 
@@ -181,6 +228,11 @@ def parse_args(argv):
     help_split = 'get each bam-file (or subread dataset file)'
     help_apply = 'run bam2fasta and dexta as a unit-of-work'
     help_combine = 'generate a file of .dexta files'
+    help_split_apply_combine = f"""all 3 steps:
+1. {help_split}
+2. {help_apply} (in parallel)
+3. {help_combine}
+"""
 
     subparsers = parser.add_subparsers(help='sub-command help')
 
@@ -207,6 +259,14 @@ def parse_args(argv):
             help=help_combine)
     add_combine_arguments(parser_combine)
     parser_combine.set_defaults(func=cmd_combine)
+
+    parser_split_apply_combine = subparsers.add_parser('split-apply-combine',
+            formatter_class=HelpF,
+            description=help_split_apply_combine,
+            epilog='By running all together, we avoid extra invocations of Python. Otherwise, this is the same.',
+            help='all 3 steps, results in uow-*/*.dexta')
+    add_split_apply_combine_arguments(parser_split_apply_combine)
+    parser_split_apply_combine.set_defaults(func=cmd_split_apply_combine)
 
     args = parser.parse_args(argv[1:])
     return args
