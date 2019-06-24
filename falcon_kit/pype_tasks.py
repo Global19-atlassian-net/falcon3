@@ -143,6 +143,9 @@ time python3 -m falcon_kit.mains.gen_gfa_v2 contig.gfa.json >| contig.gfa2
 
 #rm -f ./preads4falcon.fasta
 
+# Index p_ctg for downstream applications
+time samtools faidx p_ctg.fa
+
 touch {output.falcon_asm_done}
 """
 
