@@ -1366,7 +1366,7 @@ def construct_c_path_from_utgs(ug, u_edge_data, sg):
         print("left over edges:", len(free_edges))
     return c_path
 
-def extract_contigs(ug, u_edge_data, c_path, circular_path):
+def extract_contigs(ug, u_edge_data, c_path, circular_path, ctg_prefix):
     free_edges = set()
     for s, t, v in ug.edges(keys=True):
         free_edges.add((s, t, v))
@@ -1403,7 +1403,8 @@ def extract_contigs(ug, u_edge_data, c_path, circular_path):
 
         c_type_ = "ctg_linear" if (end_node != s0) else "ctg_circular"
 
-        new_contig = ('%06dF' % ctg_id, c_type_, s0 + "~" + v0 + "~" + \
+        ctg_name = '%s%06dF' % (ctg_prefix, ctg_id)
+        new_contig = (ctg_name, c_type_, s0 + "~" + v0 + "~" + \
                         t0, end_node, length, score, "|".join(
                         [c[0] + "~" + c[2] + "~" + c[1] for c in non_overlapped_path]))
         yield new_contig
@@ -1412,7 +1413,8 @@ def extract_contigs(ug, u_edge_data, c_path, circular_path):
         s0, t0, v0 = non_overlapped_path_r[0]
         end_node = non_overlapped_path_r[-1][1]
 
-        new_contig = ('%06dR' % ctg_id, c_type_, s0 + "~" + v0 + "~" + \
+        ctg_name = '%s%06dR' % (ctg_prefix, ctg_id)
+        new_contig = (ctg_name, c_type_, s0 + "~" + v0 + "~" + \
                         t0, end_node, length_r, score_r, "|".join(
                         [c[0] + "~" + c[2] + "~" + c[1] for c in non_overlapped_path_r]))
         yield new_contig
@@ -1427,7 +1429,8 @@ def extract_contigs(ug, u_edge_data, c_path, circular_path):
 
     for s, t, v in list(circular_path):
         length, score, path, type_ = u_edge_data[(s, t, v)]
-        new_contig = ('%6d' % ctg_id, "ctg_circular", s + \
+        ctg_name = '%s%d' % (ctg_prefix, ctg_id)
+        new_contig = (ctg_name, "ctg_circular", s + \
                         "~" + v + "~" + t, t, length, score, s + "~" + v + "~" + t)
         yield new_contig
         ctg_id += 1
@@ -1565,7 +1568,7 @@ def ovlp_to_graph(args):
     c_path.sort(key=lambda x: -x[3])
 
     # Construct the contigs (based on unitigs).
-    contigs = extract_contigs(ug, u_edge_data, c_path, circular_path)
+    contigs = extract_contigs(ug, u_edge_data, c_path, circular_path, args.ctg_prefix)
 
     # Write contigs to file.
     with open('ctg_paths', 'w') as fp_out:
@@ -1603,6 +1606,9 @@ def main(argv=sys.argv):
     parser.add_argument(
         '--disable-chimer-bridge-removal', action="store_true", default=False,
         help='disable chimer induced bridge removal')
+    parser.add_argument(
+        '--ctg-prefix', default='',
+        help='Prefix for contig names.')
 
     args = parser.parse_args(argv[1:])
     ovlp_to_graph(args)
