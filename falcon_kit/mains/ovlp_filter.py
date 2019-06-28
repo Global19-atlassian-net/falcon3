@@ -18,7 +18,7 @@ def run_filter_stage1(db_fn, fn, max_diff, max_ovlp, min_ovlp, min_len, min_idt)
         return fn, filter_stage1(reader.readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt)
 
 
-def filter_stage1(readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt):
+def filter_stage1(readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt=90.0):
     def ignore(overlap_data):
         left_count = overlap_data["5p"]
         right_count = overlap_data["3p"]
