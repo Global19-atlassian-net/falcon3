@@ -22,13 +22,15 @@ def bam_split(bam_subreadset_fn):
     """
     split_dataset_prefix = os.path.join(os.getcwd(), 'split') # TODO: Test this as relative sub-dir.
 
-    cmd = f'python2 -m pbcore.io.dataset.run_split {bam_subreadset_fn} {split_dataset_prefix}'
+    #cmd = f'falconcpp dataset-split {bam_subreadset_fn} {split_dataset_prefix}'
+    cmd = f'falconcpp dataset-split {bam_subreadset_fn}' # prefix='split' by default'
     io.syscall(cmd)
 
-    # We could glob() the result, but we also have the exactly list in a FOFN,
-    # by convention in run_split().
-    fofn_fn = f'{split_dataset_prefix}.fofn'
-    bam_paths = list(io.yield_abspath_from_fofn(fofn_fn))
+    # Someday we could also have the exactly list in a FOFN.
+    #fofn_fn = f'{split_dataset_prefix}.fofn'
+    #bam_paths = list(io.yield_abspath_from_fofn(fofn_fn))
+
+    bam_paths = glob.glob('split.*.xml')
     return bam_paths
 
 
