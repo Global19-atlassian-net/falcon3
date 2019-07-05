@@ -101,9 +101,10 @@ def run(improper_p_ctg, proper_a_ctg, preads_fasta_fn, sg_edges_list_fn, utg_dat
     # load all p-read name into memory
     with open_fasta_reader(preads_fasta_fn) as f:
         for r in f:
-            if r.name not in reads_in_layout:
+            rname = r.name.strip().split()[0]
+            if rname not in reads_in_layout:
                 continue
-            seqs[r.name] = r.sequence.upper() # name == rid-string
+            seqs[rname] = r.sequence.upper() # name == rid-string
 
     edge_data = {}
     with open_progress(sg_edges_list_fn) as f:
