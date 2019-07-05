@@ -293,10 +293,10 @@ def parse_args(argv):
         help="max difference of 5' and 3' coverage")
     parser.add_argument(
         '--max-cov', type=int,
-        help="max coverage of 5' or 3' coverage")
+        help="max coverage of 5' or 3' end")
     parser.add_argument(
         '--min-cov', type=int,
-        help="min coverage of 5' or 3' coverage")
+        help="min coverage of 5' or 3' end")
     parser.add_argument(
         '--min-len', type=int, default=2500,
         help="min length of the reads")
