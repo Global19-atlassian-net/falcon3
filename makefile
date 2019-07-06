@@ -20,7 +20,7 @@ pylint:
 	pylint --extension-pkg-whitelist=edlib --errors-only falcon_kit/
 test:
 	python3 -c 'import falcon_kit; print(falcon_kit.falcon)'
-	which py.test || pip3 install --user pytest
+	which py.test || pip3 install --user pytest pytest-mock
 	py.test ${MY_TEST_FLAGS} -W 'error' --junit-xml=test.xml --doctest-modules ${DOCTEST_MODULES} test/
 autopep8:
 	autopep8 --max-line-length=120 -ir -j0 falcon_kit/ examples/ test/ setup.py
