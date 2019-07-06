@@ -11,8 +11,8 @@ import sys
 Reader = io.CapturedProcessReaderContext
 
 
-def run_filter_stage1(db_fn, fn, max_diff, max_ovlp, min_ovlp, min_len, min_idt):
-    cmd = "LA4Falcon -mo %s %s" % (db_fn, fn)
+def run_filter_stage1(db_fn, fn, la4falcon_flags, max_diff, max_ovlp, min_ovlp, min_len, min_idt):
+    cmd = "LA4Falcon -%s %s %s" % (la4falcon_flags, db_fn, fn)
     reader = Reader(cmd)
     with reader:
         return fn, filter_stage1(reader.readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt)
@@ -68,8 +68,8 @@ def filter_stage1(readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt=90.0
     return ignore_rtn
 
 
-def run_filter_stage2(db_fn, fn, max_diff, max_ovlp, min_ovlp, min_len, min_idt, ignore_set):
-    cmd = "LA4Falcon -mo %s %s" % (db_fn, fn)
+def run_filter_stage2(db_fn, fn, la4falcon_flags, max_diff, max_ovlp, min_ovlp, min_len, min_idt, ignore_set):
+    cmd = "LA4Falcon -%s %s %s" % (la4falcon_flags, db_fn, fn)
     reader = Reader(cmd)
     with reader:
         return fn, filter_stage2(reader.readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt, ignore_set)
@@ -102,8 +102,8 @@ def filter_stage2(readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt, ign
     return contained_id
 
 
-def run_filter_stage3(db_fn, fn, max_diff, max_ovlp, min_ovlp, min_len, min_idt, ignore_set, contained_set, bestn):
-    cmd = "LA4Falcon -mo %s %s" % (db_fn, fn)
+def run_filter_stage3(db_fn, fn, la4falcon_flags, max_diff, max_ovlp, min_ovlp, min_len, min_idt, ignore_set, contained_set, bestn):
+    cmd = "LA4Falcon -%s %s %s" % (la4falcon_flags, db_fn, fn)
     reader = Reader(cmd)
     with reader:
         return fn, filter_stage3(reader.readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt, ignore_set, contained_set, bestn)
@@ -191,13 +191,15 @@ def filter_stage3(readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt, ign
     return ovlp_output
 
 
-def run_ovlp_filter(outs, exe_pool, file_list, max_diff, max_cov, min_cov, min_len, min_idt, bestn, db_fn):
+def run_ovlp_filter(outs, exe_pool, file_list, max_diff, max_cov, min_cov, min_len, min_idt, ignore_indels, bestn, db_fn):
+    la4falcon_flags = "mo" + ("I" if ignore_indels else "")
+
     io.LOG('preparing filter_stage1')
     io.logstats()
     inputs = []
     for fn in file_list:
         if len(fn) != 0:
-            inputs.append((run_filter_stage1, db_fn, fn,
+            inputs.append((run_filter_stage1, db_fn, fn, la4falcon_flags,
                            max_diff, max_cov, min_cov, min_len, min_idt))
 
     ignore_all = []
@@ -210,8 +212,8 @@ def run_ovlp_filter(outs, exe_pool, file_list, max_diff, max_cov, min_cov, min_l
     ignore_all = set(ignore_all)
     for fn in file_list:
         if len(fn) != 0:
-            inputs.append((run_filter_stage2, db_fn, fn, max_diff,
-                           max_cov, min_cov, min_len, min_idt, ignore_all))
+            inputs.append((run_filter_stage2, db_fn, fn, la4falcon_flags,
+                           max_diff, max_cov, min_cov, min_len, min_idt, ignore_all))
     contained = set()
     for res in exe_pool.imap(io.run_func, inputs):
         contained.update(res[1])
@@ -224,15 +226,15 @@ def run_ovlp_filter(outs, exe_pool, file_list, max_diff, max_cov, min_cov, min_l
     ignore_all = set(ignore_all)
     for fn in file_list:
         if len(fn) != 0:
-            inputs.append((run_filter_stage3, db_fn, fn, max_diff,
-                           max_cov, min_cov, min_len, min_idt, ignore_all, contained, bestn))
+            inputs.append((run_filter_stage3, db_fn, fn, la4falcon_flags,
+                           max_diff, max_cov, min_cov, min_len, min_idt, ignore_all, contained, bestn))
     for res in exe_pool.imap(io.run_func, inputs):
         for l in res[1]:
             outs.write(" ".join(l) + "\n")
     io.logstats()
 
 
-def try_run_ovlp_filter(out_fn, n_core, fofn, max_diff, max_cov, min_cov, min_len, min_idt, bestn, db_fn):
+def try_run_ovlp_filter(out_fn, n_core, fofn, max_diff, max_cov, min_cov, min_len, min_idt, ignore_indels, bestn, db_fn):
     io.LOG('starting ovlp_filter')
     file_list = io.validated_fns(fofn)
     io.LOG('fofn %r: %r' % (fofn, file_list))
@@ -242,7 +244,7 @@ def try_run_ovlp_filter(out_fn, n_core, fofn, max_diff, max_cov, min_cov, min_le
     try:
         with open(tmp_out_fn, 'w') as outs:
             run_ovlp_filter(outs, exe_pool, file_list, max_diff, max_cov,
-                            min_cov, min_len, min_idt, bestn, db_fn)
+                            min_cov, min_len, min_idt, ignore_indels, bestn, db_fn)
             outs.write('---\n')
         os.rename(tmp_out_fn, out_fn)
         io.LOG('finished ovlp_filter')
@@ -252,7 +254,7 @@ def try_run_ovlp_filter(out_fn, n_core, fofn, max_diff, max_cov, min_cov, min_le
         raise
 
 
-def ovlp_filter(out_fn, n_core, las_fofn, max_diff, max_cov, min_cov, min_len, min_idt, bestn, db_fn, debug, silent, stream):
+def ovlp_filter(out_fn, n_core, las_fofn, max_diff, max_cov, min_cov, min_len, min_idt, ignore_indels, bestn, db_fn, debug, silent, stream):
     if debug:
         n_core = 0
         silent = False
@@ -262,12 +264,12 @@ def ovlp_filter(out_fn, n_core, las_fofn, max_diff, max_cov, min_cov, min_len, m
         global Reader
         Reader = io.StreamedProcessReaderContext
     try_run_ovlp_filter(out_fn, n_core, las_fofn, max_diff, max_cov,
-                        min_cov, min_len, min_idt, bestn, db_fn)
+                        min_cov, min_len, min_idt, ignore_indels, bestn, db_fn)
 
 
 def parse_args(argv):
     epilog = """Output consists of selected lines from LA4Falcon -mo, e.g.
-000000047 000000550 -206 100.00 0 0 206 603 1 0 206 741 overlap
+000000047 000000550 -206 100.000 0 0 206 603 1 0 206 741 overlap
 """
 
     class HelpF(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
@@ -303,6 +305,9 @@ def parse_args(argv):
     parser.add_argument(
         '--min-idt', type=float , default=90.0,
         help="minimum alignment identity to consider an overlap")
+    parser.add_argument(
+        '--ignore-indels', action='store_true',
+        help="ignore indels in calculating alignment identity (-I to LA4Falcon)")
     parser.add_argument(
         '--bestn', type=int, default=10,
         help="output at least best n overlaps on 5' or 3' ends if possible")
