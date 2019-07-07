@@ -29,8 +29,6 @@ def filter_stage1(readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt=90.0
 
     ignore_rtn = []
     current_q_id = None
-    ave_idt = 0.0
-    all_over_len = 0.0
     overlap_data = {"5p": 0, "3p": 0}
     q_id = None
     for l in readlines():
@@ -43,8 +41,6 @@ def filter_stage1(readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt=90.0
                     ignore_rtn.append(current_q_id)
             overlap_data = {"5p": 0, "3p": 0}
             current_q_id = q_id
-            ave_idt = 0.0
-            all_over_len = 0.0
 
         overlap_len = -int(l[2])
         idt = float(l[3])
@@ -55,9 +51,6 @@ def filter_stage1(readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt=90.0
             continue
         if q_l < min_len or t_l < min_len:
             continue
-        if l[-1] in ("contains", "overlap"):
-            ave_idt += idt * overlap_len
-            all_over_len += overlap_len
         if q_s == 0:
             overlap_data["5p"] += 1
         if q_e == q_l:
