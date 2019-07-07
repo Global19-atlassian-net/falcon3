@@ -29,8 +29,6 @@ def filter_stage1(readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt=90.0
 
     ignore_rtn = []
     current_q_id = None
-    ave_idt = 0.0
-    all_over_len = 0.0
     overlap_data = {"5p": 0, "3p": 0}
     q_id = None
     for l in readlines():
@@ -43,8 +41,6 @@ def filter_stage1(readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt=90.0
                     ignore_rtn.append(current_q_id)
             overlap_data = {"5p": 0, "3p": 0}
             current_q_id = q_id
-            ave_idt = 0.0
-            all_over_len = 0.0
 
         overlap_len = -int(l[2])
         idt = float(l[3])
@@ -55,9 +51,6 @@ def filter_stage1(readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt=90.0
             continue
         if q_l < min_len or t_l < min_len:
             continue
-        if l[-1] in ("contains", "overlap"):
-            ave_idt += idt * overlap_len
-            all_over_len += overlap_len
         if q_s == 0:
             overlap_data["5p"] += 1
         if q_e == q_l:
@@ -205,11 +198,11 @@ def run_ovlp_filter(outs, exe_pool, file_list, max_diff, max_cov, min_cov, min_l
     ignore_all = []
     for res in exe_pool.imap(io.run_func, inputs):
         ignore_all.extend(res[1])
+    ignore_all = set(ignore_all)
 
     io.LOG('preparing filter_stage2')
     io.logstats()
     inputs = []
-    ignore_all = set(ignore_all)
     for fn in file_list:
         if len(fn) != 0:
             inputs.append((run_filter_stage2, db_fn, fn, la4falcon_flags,
@@ -223,7 +216,6 @@ def run_ovlp_filter(outs, exe_pool, file_list, max_diff, max_cov, min_cov, min_l
     io.LOG('preparing filter_stage3')
     io.logstats()
     inputs = []
-    ignore_all = set(ignore_all)
     for fn in file_list:
         if len(fn) != 0:
             inputs.append((run_filter_stage3, db_fn, fn, la4falcon_flags,
