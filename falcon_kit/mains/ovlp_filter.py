@@ -27,7 +27,7 @@ def filter_stage1(readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt=90.0
            (left_count < min_ovlp) or (right_count < min_ovlp):
             return True
 
-    ignore_rtn = []
+    ignore_rtn = set()    # read IDs to ignore downstream
     current_q_id = None
     overlap_data = {"5p": 0, "3p": 0}
     q_id = None
@@ -38,7 +38,7 @@ def filter_stage1(readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt=90.0
         if q_id != current_q_id:
             if current_q_id is not None:
                 if ignore(overlap_data):
-                    ignore_rtn.append(current_q_id)
+                    ignore_rtn.add(current_q_id)
             overlap_data = {"5p": 0, "3p": 0}
             current_q_id = q_id
 
@@ -57,7 +57,7 @@ def filter_stage1(readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt=90.0
             overlap_data["3p"] += 1
     if q_id is not None:
         if ignore(overlap_data):
-            ignore_rtn.append(current_q_id)
+            ignore_rtn.add(current_q_id)
     return ignore_rtn
 
 
@@ -195,10 +195,9 @@ def run_ovlp_filter(outs, exe_pool, file_list, max_diff, max_cov, min_cov, min_l
             inputs.append((run_filter_stage1, db_fn, fn, la4falcon_flags,
                            max_diff, max_cov, min_cov, min_len, min_idt))
 
-    ignore_all = []
+    ignore_all = set()
     for res in exe_pool.imap(io.run_func, inputs):
-        ignore_all.extend(res[1])
-    ignore_all = set(ignore_all)
+        ignore_all.update(res[1])
 
     io.LOG('preparing filter_stage2')
     io.logstats()
