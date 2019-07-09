@@ -27,9 +27,11 @@ def filter_stage1(readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt=90.0
            (left_count < min_ovlp) or (right_count < min_ovlp):
             return True
 
-    ignore_rtn = set()    # read IDs to ignore downstream
+    ignore_rtn = set()    # reads to ignore downstream
+    contained_rtn = set() # reads contained by a non-ignored read
     current_q_id = None
     overlap_data = {"5p": 0, "3p": 0}
+    current_contained = set() # reads contained by current_q_id
     q_id = None
     for l in readlines():
         l = l.strip().split()
@@ -39,7 +41,11 @@ def filter_stage1(readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt=90.0
             if current_q_id is not None:
                 if ignore(overlap_data):
                     ignore_rtn.add(current_q_id)
+                else:
+                    # q_id not ignored; so, record the reads it contains
+                    contained_rtn.update(current_contained)
             overlap_data = {"5p": 0, "3p": 0}
+            current_contained = set()
             current_q_id = q_id
 
         overlap_len = -int(l[2])
@@ -55,54 +61,25 @@ def filter_stage1(readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt=90.0
             overlap_data["5p"] += 1
         if q_e == q_l:
             overlap_data["3p"] += 1
+        if l[-1] == "contains":
+            current_contained.add(t_id)
     if q_id is not None:
         if ignore(overlap_data):
             ignore_rtn.add(current_q_id)
-    return ignore_rtn
+        else:
+            # q_id not ignored; so, record the reads it contains
+            contained_rtn.update(current_contained)
+    return { "ignore": ignore_rtn, "contained": contained_rtn }
 
 
-def run_filter_stage2(db_fn, fn, la4falcon_flags, max_diff, max_ovlp, min_ovlp, min_len, min_idt, ignore_set):
+def run_filter_stage2(db_fn, fn, la4falcon_flags, max_diff, max_ovlp, min_ovlp, min_len, min_idt, ignore_set, contained_set, bestn):
     cmd = "LA4Falcon -%s %s %s" % (la4falcon_flags, db_fn, fn)
     reader = Reader(cmd)
     with reader:
-        return fn, filter_stage2(reader.readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt, ignore_set)
+        return fn, filter_stage2(reader.readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt, ignore_set, contained_set, bestn)
 
 
-def filter_stage2(readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt, ignore_set):
-    contained_id = set()
-    for l in readlines():
-        l = l.strip().split()
-        q_id, t_id = l[:2]
-
-        q_s, q_e, q_l = int(l[5]), int(l[6]), int(l[7])
-        t_s, t_e, t_l = int(l[9]), int(l[10]), int(l[11])
-
-        idt = float(l[3])
-        if idt < min_idt:
-            continue
-
-        if q_l < min_len or t_l < min_len:
-            continue
-
-        if q_id in ignore_set:
-            continue
-        if t_id in ignore_set:
-            continue
-        if l[-1] == "contained":
-            contained_id.add(q_id)
-        if l[-1] == "contains":
-            contained_id.add(t_id)
-    return contained_id
-
-
-def run_filter_stage3(db_fn, fn, la4falcon_flags, max_diff, max_ovlp, min_ovlp, min_len, min_idt, ignore_set, contained_set, bestn):
-    cmd = "LA4Falcon -%s %s %s" % (la4falcon_flags, db_fn, fn)
-    reader = Reader(cmd)
-    with reader:
-        return fn, filter_stage3(reader.readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt, ignore_set, contained_set, bestn)
-
-
-def filter_stage3(readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt, ignore_set, contained_set, bestn):
+def filter_stage2(readlines, max_diff, max_ovlp, min_ovlp, min_len, min_idt, ignore_set, contained_set, bestn):
     ovlp_output = []
     overlap_data = {"5p": [], "3p": []}
     current_q_id = None
@@ -196,28 +173,19 @@ def run_ovlp_filter(outs, exe_pool, file_list, max_diff, max_cov, min_cov, min_l
                            max_diff, max_cov, min_cov, min_len, min_idt))
 
     ignore_all = set()
+    contained = set()
     for res in exe_pool.imap(io.run_func, inputs):
-        ignore_all.update(res[1])
+        ignore_all.update(res[1]["ignore"])
+        contained.update(res[1]["contained"])
+    contained = contained.difference(ignore_all) # do not count ignored reads as contained
 
+    # print "all", len(contained)
     io.LOG('preparing filter_stage2')
     io.logstats()
     inputs = []
     for fn in file_list:
         if len(fn) != 0:
             inputs.append((run_filter_stage2, db_fn, fn, la4falcon_flags,
-                           max_diff, max_cov, min_cov, min_len, min_idt, ignore_all))
-    contained = set()
-    for res in exe_pool.imap(io.run_func, inputs):
-        contained.update(res[1])
-        # print res[0], len(res[1]), len(contained)
-
-    # print "all", len(contained)
-    io.LOG('preparing filter_stage3')
-    io.logstats()
-    inputs = []
-    for fn in file_list:
-        if len(fn) != 0:
-            inputs.append((run_filter_stage3, db_fn, fn, la4falcon_flags,
                            max_diff, max_cov, min_cov, min_len, min_idt, ignore_all, contained, bestn))
     for res in exe_pool.imap(io.run_func, inputs):
         for l in res[1]:
