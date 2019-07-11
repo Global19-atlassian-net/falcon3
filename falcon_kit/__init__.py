@@ -1,5 +1,5 @@
 from .falcon_kit import *
-__version__ = '1.4.3' # should match setup.py
+__version__ = '1.4.4' # should match setup.py
 
 try:
     import sys, pkg_resources
