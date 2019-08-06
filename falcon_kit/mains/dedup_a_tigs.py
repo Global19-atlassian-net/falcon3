@@ -110,7 +110,7 @@ def run(fp_out, fp_in, max_idt, max_aln_cov, min_len_diff, min_seq_len, ploidy):
             fp_out.write('\n')
 
 def parse_args(argv):
-    parser = argparse.ArgumentParser(description='Removes duplicate a-tig, iff *all* conditions are violated. Assumes the working directory has the a_ctg_all.fa file, and produces a_ctg.fa',
+    parser = argparse.ArgumentParser(description='Removes duplicate a-tig, iff *all* conditions are violated. Assumes the working directory has the a_ctg_all.fasta file, and produces a_ctg.fasta',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--max-idt', type=int,
                         help="Keep a-tig if the identity (in %%) to the primary contig is <= max_idt", default=96)
@@ -123,7 +123,7 @@ def parse_args(argv):
     parser.add_argument('--ploidy', type=int,
                         help="For a diplid genome, 2 branches per SV are expected. This parameter limits the number of pairwise comparison. If <= 0, this threshold is not applied.", default=2)
     parser.add_argument('--a-ctg-all', type=str,
-                        help="Input set of all associate contigs for deduplication.", default="a_ctg_all.fa")
+                        help="Input set of all associate contigs for deduplication.", default="a_ctg_all.fasta")
 
     args = parser.parse_args(argv[1:])
     return args
