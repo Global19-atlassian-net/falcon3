@@ -311,8 +311,8 @@ def symlink(jo):
             link(rdir, 'utg_data')
             link(rdir, 'ctg_paths')
             # fetch_reads needs:
-            link(rdir, 'p_ctg.fa')
-            link(rdir, 'a_ctg.fa')
+            link(rdir, 'p_ctg.fasta')
+            link(rdir, 'a_ctg.fasta')
             link(rdir, 'p_ctg_tiling_path')
             link(rdir, 'a_ctg_tiling_path')
 

@@ -207,9 +207,9 @@ def parse_args(argv):
                         help='location of the a_ctg tiling path file')
     parser.add_argument('--preads-fasta', type=str, default='preads4falcon.fasta',
                         help='path to the preads4falcon.fasta file')
-    parser.add_argument('--p-ctg-fasta', type=str, default='p_ctg.fa',
+    parser.add_argument('--p-ctg-fasta', type=str, default='p_ctg.fasta',
                         help='path to the primary contigs file')
-    parser.add_argument('--a-ctg-fasta', type=str, default='a_ctg.fa',
+    parser.add_argument('--a-ctg-fasta', type=str, default='a_ctg.fasta',
                         help='path to the associate contigs file')
     parser.add_argument('--sg-edges-list', type=str, default='sg_edges_list',
                         help='string graph edges file from Falcon assembly')

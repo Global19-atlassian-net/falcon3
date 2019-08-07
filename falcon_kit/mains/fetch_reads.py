@@ -17,7 +17,7 @@ def fetch_ref_and_reads(base_dir, fofn, ctg_id, out_dir, min_ctg_lenth):
     if out_dir == None:
         out_dir = os.path.join(base_dir, '3-unzip/reads')
 
-    ctg_fa = os.path.join(base_dir, '2-asm-falcon/p_ctg.fa')
+    ctg_fa = os.path.join(base_dir, '2-asm-falcon/p_ctg.fasta')
     read_map_dir = os.path.join(base_dir, '2-asm-falcon/read_maps')
 
     rawread_id_file = os.path.join(
@@ -50,9 +50,9 @@ def fetch_ref_and_reads(base_dir, fofn, ctg_id, out_dir, min_ctg_lenth):
 
             if ctg_id != 'all':
                 ref_out = open(os.path.join(
-                    out_dir, '%s_ref.fa' % ctg_id), 'w')
+                    out_dir, '%s_ref.fasta' % ctg_id), 'w')
             else:
-                ref_out = open(os.path.join(out_dir, '%s_ref.fa' % s_id), 'w')
+                ref_out = open(os.path.join(out_dir, '%s_ref.fasta' % s_id), 'w')
 
             print('>%s' % s_id, file=ref_out)
             print(s.sequence, file=ref_out)
@@ -99,10 +99,10 @@ def fetch_ref_and_reads(base_dir, fofn, ctg_id, out_dir, min_ctg_lenth):
     def reopened_fasta_out(ctg_id):
                 # A convenient closure, with a contextmanager.
         if ctg_id not in read_out_files:
-            read_out = open(os.path.join(out_dir, '%s_reads.fa' % ctg_id), 'w')
+            read_out = open(os.path.join(out_dir, '%s_reads.fasta' % ctg_id), 'w')
             read_out_files[ctg_id] = 1
         else:
-            read_out = open(os.path.join(out_dir, '%s_reads.fa' % ctg_id), 'a')
+            read_out = open(os.path.join(out_dir, '%s_reads.fasta' % ctg_id), 'a')
         yield read_out
         read_out.close()
 
@@ -139,7 +139,7 @@ def parse_args(argv):
                         help='the output base_dir, default to `base_dir/3-unzip/reads` directory')
     parser.add_argument('--min_ctg_lenth', default=20000, type=int,
                         help='the minimum length of the contig for the outputs, default=20000')
-    #parser.add_argument('--ctg_fa', type=str, default='./2-asm-falcon/p_ctg.fa', help='path to the contig fasta file')
+    #parser.add_argument('--ctg_fa', type=str, default='./2-asm-falcon/p_ctg.fasta', help='path to the contig fasta file')
     #parser.add_argument('--read_map_dir', type=str, default='./2-asm-falcon/read_maps', help='path to the read-contig map directory')
     # we can run this in parallel mode in the furture
     # parser.add_argument('--n_core', type=int, default=4,
