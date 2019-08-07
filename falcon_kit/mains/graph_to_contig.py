@@ -151,8 +151,8 @@ def run(improper_p_ctg, proper_a_ctg, preads_fasta_fn, sg_edges_list_fn, utg_dat
                                  for e in path_or_edges.split("|")]
             utg_data[(s, v, t)] = type_, length, score, path_or_edges
 
-    p_ctg_out = open("p_ctg.fa", "w")
-    a_ctg_out = open("a_ctg_all.fa", "w")
+    p_ctg_out = open("p_ctg.fasta", "w")
+    a_ctg_out = open("a_ctg_all.fasta", "w")
     p_ctg_t_out = open("p_ctg_tiling_path", "w")
     a_ctg_t_out = open("a_ctg_all_tiling_path", "w")
     layout_ctg = set()
@@ -306,8 +306,8 @@ def main(argv=sys.argv):
     epilog = """
 We write these:
 
-    p_ctg_out = open("p_ctg.fa", "w")
-    a_ctg_out = open("a_ctg_all.fa", "w")
+    p_ctg_out = open("p_ctg.fasta", "w")
+    a_ctg_out = open("a_ctg_all.fasta", "w")
     p_ctg_t_out = open("p_ctg_tiling_path", "w")
     a_ctg_t_out = open("a_ctg_all_tiling_path", "w")
 """
