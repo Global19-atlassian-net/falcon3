@@ -114,14 +114,14 @@ ln -sf {input.preads4falcon_fasta} ./preads4falcon.fasta
 time python3 -m falcon_kit.mains.ovlp_to_graph {params.fc_ovlp_to_graph_option} --overlap-file preads.ovl >| fc_ovlp_to_graph.log
 
 # Given sg_edges_list, utg_data, ctg_paths, preads4falcon.fasta,
-# write p_ctg.fa and a_ctg_all.fa,
-# plus a_ctg_base.fa, p_ctg_tiling_path, a_ctg_tiling_path, a_ctg_base_tiling_path:
+# write p_ctg.fasta and a_ctg_all.fasta,
+# plus a_ctg_base.fasta, p_ctg_tiling_path, a_ctg_tiling_path, a_ctg_base_tiling_path:
 time python3 -m falcon_kit.mains.graph_to_contig
 
-# Given a_ctg_all.fa, write a_ctg.fa:
-time python3 -m falcon_kit.mains.dedup_a_tigs >| a_ctg.fa
+# Given a_ctg_all.fasta, write a_ctg.fasta:
+time python3 -m falcon_kit.mains.dedup_a_tigs >| a_ctg.fasta
 
-# Given a_ctg.fa and a_ctg_all_tiling_path, write a_ctg_tiling_path:
+# Given a_ctg.fasta and a_ctg_all_tiling_path, write a_ctg_tiling_path:
 time python3 -m falcon_kit.mains.dedup_a_tp >| a_ctg_tiling_path
 
 # Collect all info needed to format the GFA-1 and GFA-2 representations of
@@ -144,7 +144,7 @@ time python3 -m falcon_kit.mains.gen_gfa_v2 contig.gfa.json >| contig.gfa2
 #rm -f ./preads4falcon.fasta
 
 # Index p_ctg for downstream applications
-time samtools faidx p_ctg.fa
+time samtools faidx p_ctg.fasta
 
 touch {output.falcon_asm_done}
 """

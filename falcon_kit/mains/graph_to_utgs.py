@@ -60,7 +60,7 @@ def main(argv=sys.argv):
     G_asm = AsmGraph("sg_edges_list", "utg_data", "ctg_paths")
     G_asm.load_sg_seq("preads4falcon.fasta")
 
-    utg_out = open("utgs.fa", "w")
+    utg_out = open("utgs.fasta", "w")
 
     for utg in G_asm.utg_data:
         s, t, v = utg

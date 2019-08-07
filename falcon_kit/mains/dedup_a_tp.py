@@ -7,7 +7,7 @@ import sys
 
 def load_headers(fp_in):
     """
-    Loads all a_ctg IDs from the a_ctg.fa, which is already deduplicated.
+    Loads all a_ctg IDs from the a_ctg.fasta, which is already deduplicated.
     """
     ret = set()
     for r in fp_in:
@@ -30,10 +30,10 @@ def run(fp_out, a_ctg, a_ctg_all_tiling_path):
             fp_out.write('%s\n' % (line))
 
 def parse_args(argv):
-    parser = argparse.ArgumentParser(description='Extracts all tiling paths from a_ctg_all_tiling_paths for which there is a header in a_ctg.fa (which was already deduplicated).',
+    parser = argparse.ArgumentParser(description='Extracts all tiling paths from a_ctg_all_tiling_paths for which there is a header in a_ctg.fasta (which was already deduplicated).',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--a-ctg', type=str,
-                        help="Path to the a_ctg.fa file.", default='a_ctg.fa')
+                        help="Path to the a_ctg.fasta file.", default='a_ctg.fasta')
     parser.add_argument('--a-ctg-all-tiling-path', type=str,
                         help="Path to the a_ctg_all_tiling_path file.", default='a_ctg_all_tiling_path')
 

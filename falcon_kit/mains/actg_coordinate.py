@@ -22,7 +22,7 @@ def main(argv=sys.argv):
                 coor += abs(int(b) - int(e))
                 p_ctg_coor_map[ctg_id][w] = coor
 
-    with open_fasta_reader("a_ctg.fa") as a_ctg_fasta:
+    with open_fasta_reader("a_ctg.fasta") as a_ctg_fasta:
         for r in a_ctg_fasta:
             rid = r.name.split()
             rid, v, w = rid[:3]
