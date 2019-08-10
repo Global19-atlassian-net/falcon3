@@ -1,4 +1,8 @@
-from .falcon_kit import *
+try:
+    from .falcon_kit import *
+except ModuleNotFoundError as exc:
+    import warnings
+    warnings.warn(exc)
 __version__ = '1.5.0'
 
 try:
