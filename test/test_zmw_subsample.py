@@ -154,7 +154,8 @@ def check_main(tmpdir, input_data, coverage, genome_size, strategy, exp_success,
 
     if exp_success:
         mod.main(argv)
-        result_whitelist = open(str(out_fn)).read()
+        with open(str(out_fn)) as sin:
+            result_whitelist = sin.read()
         assert sorted(json.loads(exp_whitelist)) == sorted(json.loads(result_whitelist))
     else:
         with pytest.raises(Exception):
