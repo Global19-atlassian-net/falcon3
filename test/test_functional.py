@@ -18,9 +18,9 @@ def eq_(a, b):
 
 
 def test_get_daligner_job_descriptions():
-    example_HPCdaligner = open(example_HPCdaligner_fn)
-    result = f.get_daligner_job_descriptions(
-        example_HPCdaligner, 'raw_reads')
+    with open(example_HPCdaligner_fn) as example_HPCdaligner:
+        result = f.get_daligner_job_descriptions(
+            example_HPCdaligner, 'raw_reads')
     assert result
     #import sys, pprint
     #sys.stderr.write(pprint.pformat(result))
@@ -38,9 +38,9 @@ def test_get_daligner_job_descriptions_with_bad_arg():
 
 def test_get_daligner_job_descriptions_small():
     # when there is only 1 block, a special case
-    example_HPCdaligner = open(example_HPCdaligner_small_fn)
-    result = f.get_daligner_job_descriptions(
-        example_HPCdaligner, 'preads', single=True)
+    with open(example_HPCdaligner_small_fn) as example_HPCdaligner:
+        result = f.get_daligner_job_descriptions(
+            example_HPCdaligner, 'preads', single=True)
     assert result
     helpers.equal_multiline(result[('.1', '.1')], 'daligner -v -h1 -t50 -H1 -e0.99 -l1 -s1000 preads.1 preads.1\nLAcheck -v preads *.las\n')
     eq_(len(result), 1)
@@ -50,16 +50,16 @@ example_se161 = os.path.join(thisdir, 'se161.sh')
 
 
 def test_get_daligner_job_descriptions_se161():
-    example_HPCdaligner = open(example_se161)
-    result = f.get_daligner_job_descriptions(
-        example_HPCdaligner, 'raw_reads', single=False)
+    with open(example_se161) as example_HPCdaligner:
+        result = f.get_daligner_job_descriptions(
+            example_HPCdaligner, 'raw_reads', single=False)
     assert result
 
 
 def test_get_mjob_data():
-    example_HPCdaligner = open(example_HPCdaligner_fn)
-    result = f.get_mjob_data(
-        example_HPCdaligner)
+    with open(example_HPCdaligner_fn) as example_HPCdaligner:
+        result = f.get_mjob_data(
+            example_HPCdaligner)
     assert result
     eq_(result[1], [
         'LAmerge -v raw_reads.1 raw_reads.1.raw_reads.1 raw_reads.1.raw_reads.2',

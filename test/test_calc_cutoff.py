@@ -53,11 +53,15 @@ def test_calc_cutoff_errfile(monkeypatch, tmpdir):
         mod.main('prog --coverage 23 1 {}'.format(partial_capture_fn).split())
     #assert expected_err0 in str(excinfo.value)
     assert expected_err1 in str(excinfo.value)
-    assert expected_err0 in open(fn).read()
-    assert expected_err1 in open(fn).read()
+    with open(fn) as sin:
+        errfile_content = sin.read()
+        assert expected_err0 in errfile_content
+        assert expected_err1 in errfile_content
 
     # Also check new 'alarms.json'
     encoded0 = json.dumps(expected_err0)[1:-1]  # actually just escapes the newlines
     encoded1 = json.dumps(expected_err1)[1:-1]
-    assert encoded0 in open('alarms.json').read()
-    assert encoded1 in open('alarms.json').read()
+    with open('alarms.json') as sin:
+        alarm_content = sin.read()
+    assert encoded0 in alarm_content
+    assert encoded1 in alarm_content

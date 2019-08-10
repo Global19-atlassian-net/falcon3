@@ -112,10 +112,12 @@ def helper_create_input_files(tmpdir, input_data):
     input_files = []
     for i, input_seqs in enumerate(input_data):
         fn = tmpdir.join('in-{}'.format(i))
-        fn.write(input_seqs)
+        with open(str(fn), 'w') as sout:
+            sout.write(input_seqs)
         input_files.append(str(fn))
     fn = tmpdir.join('input.fofn')
-    fn.write('\n'.join(input_files))
+    with open(str(fn), 'w') as sout:
+        sout.write('\n'.join(input_files))
     return input_files, str(fn)
 
 def check_run(tmpdir, input_data, coverage, genome_size, strategy, exp_whitelist, exp_all, exp_stats):
@@ -144,8 +146,10 @@ def check_main(tmpdir, input_data, coverage, genome_size, strategy, exp_whitelis
 
     mod.main(argv)
 
-    result_whitelist = open(str(out_prefix) + '.whitelist.json').read()
-    result_all_zmw = open(str(out_prefix) + '.all.json').read()
+    with open(str(out_prefix) + '.whitelist.json') as sin:
+        result_whitelist = sin.read()
+    with open(str(out_prefix) + '.all.json') as sin:
+        result_all_zmw = sin.read()
 
     assert sorted(json.loads(exp_whitelist)) == sorted(json.loads(result_whitelist))
     assert sorted(json.loads(exp_all)) == sorted(json.loads(result_all_zmw))
