@@ -5,6 +5,9 @@ import subprocess
 import sys
 import glob
 
+# This is fine as long as that imports nothing else.
+from falcon_kit import __version__
+
 install_requires = [
     "networkx >=1.9.1",
     "msgpack",
@@ -24,7 +27,7 @@ except Exception:
     local_version = ''
 
 setup(name='falcon_kit',
-      version='1.4.4' + local_version, # should match __init__.py:__version__, sans +git...
+      version=__version__ + local_version,
       description='a small toolkit for DNA seqeucne alignment, overlapping, and assembly',
       author='Jason Chin',
       author_email='jchin@pacificbiosciences.com',
