@@ -195,6 +195,13 @@ def stream_stdout(call, fn):
     proc = subprocess.Popen(args, stdin=open(fn), stdout=subprocess.PIPE)
     return proc.stdout
 
+def backwards_compat(fn):
+    # This helps the transition from .fa to .fasta.
+    if not os.path.exists(fn) and fn.endswith('.fasta') and os.path.exists(fn[:-3]):
+        return fn[:-3]  # Use .fa instead.
+    else:
+        return fn
+
 
 @contextlib.contextmanager
 def open_fasta_reader(fn, log=LOG.info):
@@ -229,6 +236,7 @@ def open_fasta_reader(fn, log=LOG.info):
         ofs = sys.stdin
         filename = fn
     else:
+        filename = backwards_compat(filename)
         ofs = open(filename, mode)
     yield yield_fasta_record(ofs, filename, log=log)
     ofs.close()
