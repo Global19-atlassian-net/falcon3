@@ -115,7 +115,7 @@ time python3 -m falcon_kit.mains.ovlp_to_graph {params.fc_ovlp_to_graph_option} 
 
 # Given sg_edges_list, utg_data, ctg_paths, preads4falcon.fasta,
 # write p_ctg.fasta and a_ctg_all.fasta,
-# plus a_ctg_base.fasta, p_ctg_tiling_path, a_ctg_tiling_path, a_ctg_base_tiling_path:
+# plus p_ctg_tiling_path, a_ctg_tiling_path:
 time python3 -m falcon_kit.mains.graph_to_contig
 
 # Given a_ctg_all.fasta, write a_ctg.fasta:
