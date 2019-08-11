@@ -1,17 +1,10 @@
 
-
-
-#import os
-#import random
-#random.seed(int(os.environ['PYTHONHASHSEED']))
-#import warnings
-#warnings.warn('PYTHONHASHSEED={}'.format(os.environ['PYTHONHASHSEED']))
-
 from future.utils import viewitems
 from future.utils import itervalues
 from builtins import object
 import networkx as nx
 import os
+import random
 import shlex
 import subprocess
 import sys
@@ -21,6 +14,12 @@ from ..util.ordered_set import OrderedSet as set
 
 # Not sure if adds to stability, but at least adds determinism.
 from collections import OrderedDict as dict
+
+PYTHONHASHSEED = os.environ.get('PYTHONHASHSEED')
+#random.seed(int(os.environ['PYTHONHASHSEED']))  # probably harmless but has no impact here
+if PYTHONHASHSEED:
+    import warnings
+    warnings.warn('PYTHONHASHSEED={}'.format(PYTHONHASHSEED))
 
 DEBUG_LOG_LEVEL = 0
 
