@@ -1,17 +1,10 @@
 
-
-
-#import os
-#import random
-#random.seed(int(os.environ['PYTHONHASHSEED']))
-#import warnings
-#warnings.warn('PYTHONHASHSEED={}'.format(os.environ['PYTHONHASHSEED']))
-
 from future.utils import viewitems
 from future.utils import itervalues
 from builtins import object
 import networkx as nx
 import os
+import random
 import shlex
 import subprocess
 import sys
@@ -21,6 +14,12 @@ from ..util.ordered_set import OrderedSet as set
 
 # Not sure if adds to stability, but at least adds determinism.
 from collections import OrderedDict as dict
+
+PYTHONHASHSEED = os.environ.get('PYTHONHASHSEED')
+#random.seed(int(os.environ['PYTHONHASHSEED']))  # probably harmless but has no impact here
+if PYTHONHASHSEED:
+    import warnings
+    warnings.warn('PYTHONHASHSEED={}'.format(PYTHONHASHSEED))
 
 DEBUG_LOG_LEVEL = 0
 
@@ -469,7 +468,7 @@ def reverse_path(p):
     return [reverse_end(n) for n in p]
 
 
-def find_bundle(ug, u_edge_data, start_node, depth_cutoff, width_cutoff, length_cutoff):
+def find_bundle(ug, u_edge_data, start_node, depth_cutoff, width_cutoff, length_cutoff, no_out_edge_printed):
 
     tips = set()
     bundle_edges = set()
@@ -564,7 +563,9 @@ def find_bundle(ug, u_edge_data, start_node, depth_cutoff, width_cutoff, length_
                 print("process", v)
 
             if len(local_graph.out_edges(v, keys=True)) == 0:  # dead end route
-                print("no out edge", v)
+                if v not in no_out_edge_printed:
+                    print("no out edge", v)
+                    no_out_edge_printed.add(v)
                 continue
 
             max_score_edge = None
@@ -916,7 +917,7 @@ def generate_string_graph(args):
 
 
 def construct_compound_paths(ug, u_edge_data):
-
+    no_out_edge_printed = set()
     source_nodes = set()
     sink_nodes = set()
     simple_nodes = set()
@@ -940,7 +941,7 @@ def construct_compound_paths(ug, u_edge_data):
     for p in list(branch_nodes):
         if ug.out_degree(p) > 1:
             coverage, data, data_r = find_bundle(
-                ug, u_edge_data, p, 48, 16, 500000)
+                ug, u_edge_data, p, 48, 16, 500000, no_out_edge_printed)
             if coverage == True:
                 start_node, end_node, bundle_edges, length, score, depth = data
                 compound_paths_0.append(
