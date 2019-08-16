@@ -227,9 +227,8 @@ def open_fasta_reader(fn, log=LOG.info):
         ref000004|EGFR_Exon_5 157 c368b8191164a9d6ab76fd328e2803ca
     """
     filename = abspath(expanduser(fn))
-    mode = 'r'
     if filename.endswith(".gz"):
-        ofs = gzip.open(filename, mode)
+        ofs = gzip.open(filename, 'rt')
     elif filename.endswith(".dexta"):
         ofs = stream_stdout("undexta -vkU -w60 -i", filename)
     elif '-' == fn:
@@ -237,7 +236,7 @@ def open_fasta_reader(fn, log=LOG.info):
         filename = fn
     else:
         filename = backwards_compat(filename)
-        ofs = open(filename, mode)
+        ofs = open(filename, 'rt')
     yield yield_fasta_record(ofs, filename, log=log)
     ofs.close()
 
@@ -261,7 +260,7 @@ def open_fasta_writer(fn, log=LOG.info):
     """
     filename = abspath(expanduser(fn))
     if filename.endswith(".gz"):
-        ofs = gzip.open(filename, 'wb')
+        ofs = gzip.open(filename, 'wt')
     elif filename.endswith(".dexta"):
         ofs = stream_stdout("dexta -vk -i", filename)
     elif '-' == fn:
