@@ -21,7 +21,7 @@ def run(genome_size, coverage, capture):
     except Exception as e:
         msg = 'User-provided genome_size: {}\nDesired coverage: {}\n'.format(
             genome_size, coverage)
-        raise Exception(msg) from e
+        raise e.__class__(msg) from e
     sys.stdout.write(str(cutoff))
 
 
