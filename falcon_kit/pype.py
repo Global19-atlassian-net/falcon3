@@ -179,7 +179,8 @@ def gen_parallel_tasks(
     gathered_dn = os.path.dirname(gathered_fn)
     result_fn_list_fn = os.path.join(gathered_dn, 'result-fn-list.json')
     # Dump (with rel-paths) into next task-dir before next task starts.
-    io.serialize(result_fn_list_fn, [os.path.relpath(v, gathered_dn) for v in list(task_results.values())])
+    io.serialize(result_fn_list_fn, [os.path.relpath(v, gathered_dn) for v in list(task_results.values())],
+            only_if_needed=True)
     #assert 'result_fn_list' not in gather_inputs
     #gather_inputs['result_fn_list'] = result_fn_list_fn # No! pseudo output, since it must exist in a known directory
     LOG.debug('gather_inputs:{!r}'.format(gather_inputs))

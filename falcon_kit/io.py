@@ -148,20 +148,28 @@ def deserialize(fn):
     return val
 
 
-def serialize(fn, val):
+def serialize(fn, val, only_if_needed=False):
     """Assume dirname exists.
     """
     log('Serializing {} records'.format(len(val)))
     mkdirs(os.path.dirname(fn))
+    ofs = io.BytesIO()
+    if fn.endswith('.msgpack'):
+        write_as_msgpack(ofs, val)
+    elif fn.endswith('.json'):
+        write_as_json(ofs, val)
+        ofs.write(b'\n') # for vim
+    else:
+        raise Exception('Unknown extension for {!r}'.format(fn))
+    content = ofs.getvalue()
+    if only_if_needed and os.path.exists(fn):
+        with open(fn, 'rb') as ifs:
+            current = ifs.read()
+        if current == content:
+            return
     with open(fn, 'wb') as ofs:
         log('  Opened for write: {!r}'.format(fn))
-        if fn.endswith('.msgpack'):
-            write_as_msgpack(ofs, val)
-        elif fn.endswith('.json'):
-            write_as_json(ofs, val)
-            ofs.write(b'\n') # for vim
-        else:
-            raise Exception('Unknown extension for {!r}'.format(fn))
+        ofs.write(content)
 
 
 def yield_abspath_from_fofn(fofn_fn):
