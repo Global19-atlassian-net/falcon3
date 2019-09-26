@@ -115,7 +115,7 @@ class AsmGraph(object):
                 score = int(l[5])
                 path = tuple((e.split("~") for e in l[6].split("|")))
                 self.ctg_data[ctg_id] = (
-                    ctg_type, start_edge, end_node,  length, score, path)
+                    ctg_type, start_edge, end_node, length, score, path)
                 for u in path:
                     s, v, t = u
                     # rint s,v,t
