@@ -12,9 +12,12 @@ def run(fp_out, collected_gfa):
 
     gfa_graph.write_gfa_v1(fp_out)
 
+class HelpF(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+    pass
+
 def parse_args(argv):
     parser = argparse.ArgumentParser(description="Generates GFA output (on stdout) from FALCON's assembly.",
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                     formatter_class=HelpF)
     parser.add_argument('collected_gfa', type=str, default='asm.gfa.json',
                         help='Path to the file with collected and formatted data for generating the GFA')
     args = parser.parse_args(argv[1:])

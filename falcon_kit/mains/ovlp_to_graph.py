@@ -1,8 +1,8 @@
-
 from future.utils import viewitems
 from future.utils import itervalues
 from builtins import object
 import networkx as nx
+import argparse
 import os
 import random
 import shlex
@@ -1578,11 +1578,12 @@ def ovlp_to_graph(args):
             fp_out.write('\n')
 
 
-def main(argv=sys.argv):
-    import argparse
+class HelpF(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+    pass
 
+def main(argv=sys.argv):
     parser = argparse.ArgumentParser(description='a example string graph assembler that is desinged for handling diploid genomes',
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                     formatter_class=HelpF)
     parser.add_argument(
         '--overlap-file', default='preads.ovl',
         help='a file that contains the overlap information.')

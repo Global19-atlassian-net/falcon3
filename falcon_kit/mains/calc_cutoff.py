@@ -25,6 +25,9 @@ def run(genome_size, coverage, capture):
     sys.stdout.write(str(cutoff))
 
 
+class HelpF(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+    pass
+
 def main(argv=sys.argv):
     import argparse
 
@@ -43,7 +46,7 @@ Note: If PBFALCON_ERRFILE is defined (and its directory is writable),
 we will write errors there in addition to stderr.
 """
     parser = argparse.ArgumentParser(description=description, epilog=epilog,
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                     formatter_class=HelpF)
     parser.add_argument('--coverage', type=float, default=20,
                         help='Desired coverage ratio (i.e. over-sampling)')
     parser.add_argument('genome_size', type=int,

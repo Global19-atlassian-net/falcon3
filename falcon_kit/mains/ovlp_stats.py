@@ -1,7 +1,3 @@
-
-
-
-
 from falcon_kit.multiproc import Pool
 import falcon_kit.util.io as io
 import argparse
@@ -112,9 +108,12 @@ def ovlp_stats(db_fn, fofn, min_len, n_core, stream, debug, silent):
     try_run_ovlp_stats(n_core, db_fn, fofn, min_len)
 
 
+class HelpF(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+    pass
+
 def parse_args(argv):
     parser = argparse.ArgumentParser(description='a simple multi-processes LAS ovelap data filter',
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                     formatter_class=HelpF)
     parser.add_argument('--n-core', type=int, default=4,
                         help='number of processes used for generating consensus; '
                         '0 for main process only')

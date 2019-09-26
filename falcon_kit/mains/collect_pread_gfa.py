@@ -198,9 +198,12 @@ def run(fp_out, p_ctg_tiling_path, a_ctg_tiling_path,
     fp_out.write(serialize_gfa(gfa_graph))
     fp_out.write('\n')
 
+class HelpF(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+    pass
+
 def parse_args(argv):
     parser = argparse.ArgumentParser(description="Generates GFA output (on stdout) from FALCON's assembly.",
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                     formatter_class=HelpF)
     parser.add_argument('--p-ctg-tiling-path', type=str, default='p_ctg_tiling_path',
                         help='location of the p_ctg tiling path file')
     parser.add_argument('--a-ctg-tiling-path', type=str, default='a_ctg_tiling_path',

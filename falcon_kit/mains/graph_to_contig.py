@@ -301,6 +301,9 @@ def run(improper_p_ctg, proper_a_ctg, preads_fasta_fn, sg_edges_list_fn, utg_dat
     a_ctg_t_out.close()
     p_ctg_t_out.close()
 
+class HelpF(argparse.RawDescriptionHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+    pass
+
 def main(argv=sys.argv):
     description = 'Generate the primary and alternate contig fasta files and tiling paths, given the string graph.'
     epilog = """
@@ -313,7 +316,7 @@ We write these:
 """
     parser = argparse.ArgumentParser(
             description=description,
-            formatter_class=argparse.RawDescriptionHelpFormatter,
+            formatter_class=HelpF,
             epilog=epilog)
     parser.add_argument('--improper-p-ctg', action='store_true',
             help='Skip the initial read in each p_ctg path.')

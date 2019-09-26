@@ -45,11 +45,14 @@ def run(fp_out, preads_fasta_fn, sg_edges_list_fns):
                 continue
             fp_out.write('>{}\n{}\n'.format(r.name, r.sequence.upper()))
 
+class HelpF(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+    pass
+
 def main(argv=sys.argv):
     description = 'Create a reduced set of preads, with only those used in the final layout. Write to stdout.'
     parser = argparse.ArgumentParser(
             description=description,
-            formatter_class=argparse.RawDescriptionHelpFormatter)
+            formatter_class=HelpF)
     parser.add_argument('--preads-fasta-fn', type=str,
             default='preads4falcon.fasta',
             help='Preads file, required to construct the contigs.')

@@ -287,9 +287,12 @@ def format_seq(seq, col):
     return "\n".join([seq[i:(i + col)] for i in range(0, len(seq), col)])
 
 
+class HelpF(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+    pass
+
 def parse_args(argv):
     parser = argparse.ArgumentParser(description='a simple multi-processor consensus sequence generator',
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                     formatter_class=HelpF)
     parser.add_argument('--n-core', type=int, default=24,
                         help='number of processes used for generating consensus; '
                         '0 for main process only')

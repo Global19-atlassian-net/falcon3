@@ -10,9 +10,12 @@ def run(fp_out, fp_in, collected_gfa):
     gfa_graph = deserialize_gfa(fp_in)
     gfa_graph.write_bandage_csv(fp_out)
 
+class HelpF(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+    pass
+
 def parse_args(argv):
     parser = argparse.ArgumentParser(description="Generates the Bandage CSV file with node colors, from FALCON's assembly.",
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                     formatter_class=HelpF)
     parser.add_argument('collected_gfa', type=str, default='asm.gfa.json',
                         help='Path to the file with collected and formatted data for generating the GFA')
     args = parser.parse_args(argv[1:])

@@ -29,9 +29,12 @@ def run(fp_out, a_ctg, a_ctg_all_tiling_path):
                 continue
             fp_out.write('%s\n' % (line))
 
+class HelpF(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+    pass
+
 def parse_args(argv):
     parser = argparse.ArgumentParser(description='Extracts all tiling paths from a_ctg_all_tiling_paths for which there is a header in a_ctg.fasta (which was already deduplicated).',
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                     formatter_class=HelpF)
     parser.add_argument('--a-ctg', type=str,
                         help="Path to the a_ctg.fasta file.", default='a_ctg.fasta')
     parser.add_argument('--a-ctg-all-tiling-path', type=str,
