@@ -109,9 +109,12 @@ def run(fp_out, fp_in, max_idt, max_aln_cov, min_len_diff, min_seq_len, ploidy):
             fp_out.write(a_ctg.sequence)
             fp_out.write('\n')
 
+class HelpF(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+    pass
+
 def parse_args(argv):
     parser = argparse.ArgumentParser(description='Removes duplicate a-tig, iff *all* conditions are violated. Assumes the working directory has the a_ctg_all.fasta file, and produces a_ctg.fasta',
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                     formatter_class=HelpF)
     parser.add_argument('--max-idt', type=int,
                         help="Keep a-tig if the identity (in %%) to the primary contig is <= max_idt", default=96)
     parser.add_argument('--max-aln-cov', type=int,

@@ -36,10 +36,13 @@ def run(fp_out, yield_zmw_tuple_func):
         zmw_num_passes = len(zmw_subreads_list)
         fp_out.write('{}\t{}\t{}\t{}\n'.format(movie_zmw, zmw_unique_molecular_size, zmw_total_size, zmw_num_passes))
 
+class HelpF(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+    pass
+
 def parse_args(argv):
     parser = argparse.ArgumentParser(description="For a given streamed FASTA file, it collects all subreads per ZMW, "\
                                         "calculates the median insert size, and writes out a TSV file with base counts.",
-                                        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                        formatter_class=HelpF)
     args = parser.parse_args(argv[1:])
     return args
 
