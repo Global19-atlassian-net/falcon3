@@ -257,7 +257,7 @@ def run(improper_p_ctg, proper_a_ctg, preads_fasta_fn, sg_edges_list_fn, utg_dat
             p_ctg_out.write('\n')
 
             a_id = 0
-            for v, w in a_ctg_group:
+            for (v, w) in a_ctg_group.keys():
                 atig_output = []
 
                 # Compose the base sequence.

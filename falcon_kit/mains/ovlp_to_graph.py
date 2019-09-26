@@ -1245,7 +1245,7 @@ def remove_dup_simple_path(ug, u_edge_data):
             else:
                 simple_edges.add((s, t))
                 dup_edges[(s, t)] = [v]
-    for s, t in dup_edges:
+    for (s, t) in dup_edges.keys():
         vl = dup_edges[(s, t)]
         vl.sort()
         for v in vl[1:]:
@@ -1443,7 +1443,7 @@ def ovlp_to_graph(args):
     #dual_path = {}
     sg2 = nx.DiGraph()
 
-    for v, w in edge_data:
+    for (v, w) in edge_data.keys():
         assert (reverse_end(w), reverse_end(v)) in edge_data
         # if (v, w) in masked_edges:
         #    continue
