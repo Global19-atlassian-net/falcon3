@@ -11,7 +11,7 @@ See FALCON-pbsmrtpipe/pbfalcon/report_preassembly.py for XML version.
 from future.utils import viewitems
 from builtins import object
 from .FastaReader import open_fasta_reader
-from .util.io import syscall
+from .io import capture as syscall
 from . import functional
 import collections
 import glob
