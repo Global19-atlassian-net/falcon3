@@ -1585,7 +1585,7 @@ def main(argv=sys.argv):
     parser = argparse.ArgumentParser(description='a example string graph assembler that is desinged for handling diploid genomes',
                                      formatter_class=HelpF)
     parser.add_argument(
-        '--overlap-file', default='preads.ovl',
+        '--overlap-file', default='preads.m4',
         help='a file that contains the overlap information.')
     parser.add_argument(
         '--min_len', type=int, default=4000,

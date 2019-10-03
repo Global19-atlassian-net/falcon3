@@ -100,18 +100,18 @@ touch {output.job_done}
 """
 TASK_RUN_FALCON_ASM_SCRIPT = """\
 # Given, las_fofn.json,
-# write preads.ovl:
+# write preads.m4:
 
 # mobs uses binwrappers, so it does not see our "entry-points".
 # So, after dropping "src/py_scripts/*.py", we can call these via python3 -m:
 
-time python3 -m falcon_kit.mains.ovlp_filter --db {input.db_file} --las-fofn {input.las_fofn} {params.overlap_filtering_setting} --min-len {params.length_cutoff_pr} --out-fn preads.ovl
+time python3 -m falcon_kit.mains.ovlp_filter --db {input.db_file} --las-fofn {input.las_fofn} {params.overlap_filtering_setting} --min-len {params.length_cutoff_pr} --out-fn preads.m4
 
 ln -sf {input.preads4falcon_fasta} ./preads4falcon.fasta
 
-# Given preads.ovl,
+# Given preads.m4,
 # write sg_edges_list, c_path, utg_data, ctg_paths.
-time python3 -m falcon_kit.mains.ovlp_to_graph {params.fc_ovlp_to_graph_option} --overlap-file preads.ovl >| fc_ovlp_to_graph.log
+time python3 -m falcon_kit.mains.ovlp_to_graph {params.fc_ovlp_to_graph_option} --overlap-file preads.m4 >| fc_ovlp_to_graph.log
 
 # Given sg_edges_list, utg_data, ctg_paths, preads4falcon.fasta,
 # write p_ctg.fasta and a_ctg_all.fasta,
