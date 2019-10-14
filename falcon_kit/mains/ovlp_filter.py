@@ -238,7 +238,7 @@ def parse_args(argv):
         epilog=epilog,
         formatter_class=HelpF)
     parser.add_argument(
-        '--out-fn', default='preads.ovl',
+        '--out-fn', default='preads.m4',
         help='Output filename')
     parser.add_argument(
         '--n-core', type=int, default=4,

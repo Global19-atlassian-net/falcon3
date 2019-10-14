@@ -95,6 +95,8 @@ def check_HPCdaligner_option(option):
         msg += 'HPC.daligner option "-dal" has changed to "-B".\n'
     if '-deg' in option:
         msg += 'HPC.daligner option "-deg" has changed to "-D".\n'
+    if '-D' in option:
+        msg += 'HPC.daligner option "-D" is no longer valid.\n'
     if msg:
         raise Exception(msg)
 
@@ -351,8 +353,8 @@ def update_defaults(cfg):
     set_default('overlap_filtering_setting', '--max-diff 1000 --max-cov 1000 --min-cov 2')
     #set_default('pa_daligner_option', '-e.70 -s100 -t16') # TODO: -t is a dumb default
     #set_default('ovlp_daligner_option', '-e.96 -s1000 -h60 -t32') # TODO: -t is a dumb default
-    set_default('pa_HPCdaligner_option', '-v -D24')
-    set_default('ovlp_HPCdaligner_option', '-v -D24 -l500')
+    set_default('pa_HPCdaligner_option', '-v')
+    set_default('ovlp_HPCdaligner_option', '-v -l500')
     set_default('pa_HPCTANmask_option', '-l500') # daligner defaults to -l1000
     #set_default('ovlp_HPCTANmask_option', '-l500')
     set_default('pa_REPmask_code', '0,300/0,300/0,300')

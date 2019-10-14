@@ -216,7 +216,7 @@ def parse_args(argv):
                         help='path to the associate contigs file')
     parser.add_argument('--sg-edges-list', type=str, default='sg_edges_list',
                         help='string graph edges file from Falcon assembly')
-    parser.add_argument('--preads-ovl', type=str, default='preads.ovl',
+    parser.add_argument('--preads-ovl', type=str, default='preads.m4',
                         help='the preads overlap file')
     parser.add_argument('--utg-data', type=str,
                         default='utg_data', help='unitig data file from Falcon')
