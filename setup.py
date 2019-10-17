@@ -9,7 +9,7 @@ import glob
 from falcon_kit import __version__
 
 install_requires = [
-    "networkx >=1.9.1",
+    "networkx >=1.9.1,<2.4",
     "msgpack",
     "future >= 0.16.0",
     #"logging_tree",
