@@ -664,17 +664,7 @@ def find_bundle(ug, u_edge_data, start_node, depth_cutoff, width_cutoff, length_
 
 
 def generate_string_graph(args):
-    overlap_file = args.overlap_file
 
-    contained_reads = set()
-    chimer_ids = set()
-
-    filter_reads = False
-
-    seqs = set()
-
-    G = nx.Graph()
-    edges = set()
     overlap_data = []
     contained_reads = set()
     overlap_count = {}
@@ -690,11 +680,6 @@ def generate_string_graph(args):
 
             if f_id == g_id:  # don't need self-self overlapping
                 return
-            if filter_reads:
-                if g_id not in seqs:
-                    return
-                if f_id not in seqs:
-                    return
             score = int(score)
             identity = float(identity)
             contained = l[12]
@@ -741,6 +726,7 @@ def generate_string_graph(args):
             overlap_count[f_id] = overlap_count.get(f_id, 0) + 1
             overlap_count[g_id] = overlap_count.get(g_id, 0) + 1
 
+    overlap_file = args.overlap_file
     with open(overlap_file) as f:
         n = 0
         for line in f:
@@ -1259,10 +1245,8 @@ def construct_c_path_from_utgs(ug, u_edge_data, sg):
     # Side-effects: None, I think.
 
     s_nodes = set()
-    #t_nodes = set()
     simple_nodes = set()
     simple_out = set()
-    #simple_in = set()
 
     all_nodes = ug.nodes()
     for n in all_nodes:
@@ -1273,12 +1257,8 @@ def construct_c_path_from_utgs(ug, u_edge_data, sg):
         else:
             if out_degree != 0:
                 s_nodes.add(n)
-            # if in_degree != 0:
-            #    t_nodes.add(n)
         if out_degree == 1:
             simple_out.add(n)
-        # if in_degree == 1:
-        #    simple_in.add(n)
 
     c_path = []
 
@@ -1545,11 +1525,8 @@ def ovlp_to_graph(args):
         length, score, edges, type_ = u_edge_data[(s, t, v)]
         u_edge_data[(s, t, v)] = length, score, edges, "repeat_bridge"
 
-    ug = ug2
-
     # Repeat the aggresive spur filtering with slightly larger spur length.
-    ug2 = identify_spurs(ug, u_edge_data, 80000)
-    ug = ug2
+    ug = identify_spurs(ug2, u_edge_data, 80000)
 
     with open("utg_data", "w") as f:
         for s, t, v in u_edge_data:
