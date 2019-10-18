@@ -662,87 +662,10 @@ def find_bundle(ug, u_edge_data, start_node, depth_cutoff, width_cutoff, length_
         print(converage, data, data_r)
     return converage, data, data_r
 
-
-def generate_string_graph(args):
-
-    overlap_data = []
-    contained_reads = set()
-    overlap_count = {}
-
-    # loop through the overlapping data to load the data in the a python array
-    # contained reads are identified
-
-    def process_fields(l):
-            # work around for some ill formed data recored
-            # if len(l) != 13:
-            #    continue
-            f_id, g_id, score, identity = l[:4]
-
-            if f_id == g_id:  # don't need self-self overlapping
-                return
-            score = int(score)
-            identity = float(identity)
-            contained = l[12]
-            if contained == "contained":
-                contained_reads.add(f_id)
-                return
-            if contained == "contains":
-                contained_reads.add(g_id)
-                return
-            if contained == "none":
-                return
-            if identity < args.min_idt:  # only take record with >96% identity as overlapped reads
-                return
-            f_strain, f_start, f_end, f_len = (int(c) for c in l[4:8])
-            g_strain, g_start, g_end, g_len = (int(c) for c in l[8:12])
-
-            # only used reads longer than the 4kb for assembly
-            if f_len < args.min_len:
-                return
-            if g_len < args.min_len:
-                return
-            """
-            # double check for proper overlap
-            # this is not necessary when using DALIGNER for overlapper
-            # it may be useful if other overlappers give fuzzier alignment boundary
-            if f_start > 24 and f_len - f_end > 24:  # allow 24 base tolerance on both sides of the overlapping
-                return
-            if g_start > 24 and g_len - g_end > 24:
-                return
-            if g_strain == 0:
-                if f_start < 24 and g_len - g_end > 24:
-                    return
-                if g_start < 24 and f_len - f_end > 24:
-                    return
-            else:
-                if f_start < 24 and g_start > 24:
-                    return
-                if g_start < 24 and f_start > 24:
-                    return
-            """
-            overlap_data.append((f_id, g_id, score, identity,
-                                 f_strain, f_start, f_end, f_len,
-                                 g_strain, g_start, g_end, g_len))
-            overlap_count[f_id] = overlap_count.get(f_id, 0) + 1
-            overlap_count[g_id] = overlap_count.get(g_id, 0) + 1
-
-    overlap_file = args.overlap_file
-    with open(overlap_file) as f:
-        n = 0
-        for line in f:
-            if line.startswith('-'):
-                break
-            l = line.strip().split()
-            process_fields(l)
-            n += 1
-        else:
-            # This happens only if we did not 'break' from the for-loop.
-            msg = 'No end-of-file marker for overlap_file {!r} after {} lines.'.format(
-                overlap_file, n)
-            raise Exception(msg)
+def init_string_graph(overlap_data, contained_reads):
+    sg = StringGraph()
 
     overlap_set = set()
-    sg = StringGraph()
     for od in overlap_data:
         f_id, g_id, score, identity = od[:4]
         if f_id in contained_reads:
@@ -835,8 +758,125 @@ def generate_string_graph(args):
                             identity=identity)
 
     sg.init_reduce_dict()
-
     sg.mark_tr_edges()  # mark those edges that transitive redundant
+    return sg
+
+def init_digraph(sg, chimer_edges, removed_edges, spur_edges):
+    nxsg = nx.DiGraph()
+    edge_data = {}
+    with open("sg_edges_list", "w") as out_f:
+        for v, w in sg.edges: # sort, or OrderedDict
+            e = sg.edges[(v, w)]
+            rid, sp, tp = e.attr["label"]
+            score = e.attr["score"]
+            identity = e.attr["identity"]
+            length = abs(sp - tp)
+
+            if sg.e_reduce[(v, w)] != True:
+                type_ = "G"
+                label = "%s:%d-%d" % (rid, sp, tp)
+                nxsg.add_edge(v, w, label=label, length=length, score=score)
+                edge_data[(v, w)] = (rid, sp, tp, length, score, identity, type_)
+                if w in sg.best_in:
+                    nxsg.nodes[w]["best_in"] = v
+            elif (v, w) in chimer_edges:
+                type_ = "C"
+            elif (v, w) in removed_edges:
+                type_ = "R"
+            elif (v, w) in spur_edges:
+                type_ = "S"
+            elif sg.e_reduce[(v, w)] == True:
+                type_ = "TR"
+
+            line = '%s %s %s %5d %5d %5d %5.2f %s' % (
+                v, w, rid, sp, tp, score, identity, type_)
+            print(line, file=out_f)
+
+    return nxsg, edge_data
+
+
+def parse_overlap_file(args):
+
+    overlap_data = []
+    contained_reads = set()
+
+    # loop through the overlapping data to load the data in the a python array
+    # contained reads are identified
+
+    def process_fields(l):
+        # work around for some ill formed data recored
+        # if len(l) != 13:
+        #    continue
+        f_id, g_id, score, identity = l[:4]
+
+        if f_id == g_id:  # don't need self-self overlapping
+            return
+        score = int(score)
+        identity = float(identity)
+        contained = l[12]
+        if contained == "contained":
+            contained_reads.add(f_id)
+            return
+        if contained == "contains":
+            contained_reads.add(g_id)
+            return
+        if contained == "none":
+            return
+        if identity < args.min_idt:  # only take record with >96% identity as overlapped reads
+            return
+        f_strain, f_start, f_end, f_len = (int(c) for c in l[4:8])
+        g_strain, g_start, g_end, g_len = (int(c) for c in l[8:12])
+
+        # only used reads longer than the 4kb for assembly
+        if f_len < args.min_len:
+            return
+        if g_len < args.min_len:
+            return
+        """
+        # double check for proper overlap
+        # this is not necessary when using DALIGNER for overlapper
+        # it may be useful if other overlappers give fuzzier alignment boundary
+        if f_start > 24 and f_len - f_end > 24:  # allow 24 base tolerance on both sides of the overlapping
+            return
+        if g_start > 24 and g_len - g_end > 24:
+            return
+        if g_strain == 0:
+            if f_start < 24 and g_len - g_end > 24:
+                return
+            if g_start < 24 and f_len - f_end > 24:
+                return
+        else:
+            if f_start < 24 and g_start > 24:
+                return
+            if g_start < 24 and f_start > 24:
+                return
+        """
+        overlap_data.append((f_id, g_id, score, identity,
+                            f_strain, f_start, f_end, f_len,
+                            g_strain, g_start, g_end, g_len))
+
+    overlap_file = args.overlap_file
+    with open(overlap_file) as f:
+        n = 0
+        for line in f:
+            if line.startswith('-'):
+                break
+            l = line.strip().split()
+            process_fields(l)
+            n += 1
+        else:
+            # This happens only if we did not 'break' from the for-loop.
+            msg = 'No end-of-file marker for overlap_file {!r} after {} lines.'.format(
+                overlap_file, n)
+            raise Exception(msg)
+
+    return overlap_data, contained_reads
+
+def generate_string_graph(args):
+
+    overlap_data, contained_reads = parse_overlap_file(args)
+
+    sg = init_string_graph(overlap_data, contained_reads)
 
     if DEBUG_LOG_LEVEL > 1:
         print(sum([1 for c in itervalues(sg.e_reduce) if c == True]))
@@ -866,44 +906,11 @@ def generate_string_graph(args):
     if DEBUG_LOG_LEVEL > 1:
         print(sum([1 for c in itervalues(sg.e_reduce) if c == False]))
 
-    out_f = open("sg_edges_list", "w")
-    nxsg = nx.DiGraph()
-    edge_data = {}
-    for v, w in sg.edges: # sort, or OrderedDict
-        e = sg.edges[(v, w)]
-        rid, sp, tp = e.attr["label"]
-        score = e.attr["score"]
-        identity = e.attr["identity"]
-        length = abs(sp - tp)
-
-        if sg.e_reduce[(v, w)] != True:
-            type_ = "G"
-            label = "%s:%d-%d" % (rid, sp, tp)
-            nxsg.add_edge(v, w, label=label, length=length, score=score)
-            edge_data[(v, w)] = (rid, sp, tp, length, score, identity, type_)
-            if w in sg.best_in:
-                nxsg.nodes[w]["best_in"] = v
-        elif (v, w) in chimer_edges:
-            type_ = "C"
-        elif (v, w) in removed_edges:
-            type_ = "R"
-        elif (v, w) in spur_edges:
-            type_ = "S"
-        elif sg.e_reduce[(v, w)] == True:
-            type_ = "TR"
-
-        line = '%s %s %s %5d %5d %5d %5.2f %s' % (
-            v, w, rid, sp, tp, score, identity, type_)
-        print(line, file=out_f)
-
-    out_f.close()
+    nxsg, edge_data = init_digraph(sg, chimer_edges, removed_edges, spur_edges)
     nxsg_r = nxsg.reverse()
-
     return nxsg, nxsg_r, edge_data
 
-
-def construct_compound_paths(ug, u_edge_data):
-    no_out_edge_printed = set()
+def identify_node_types(ug):
     source_nodes = set()
     sink_nodes = set()
     simple_nodes = set()
@@ -922,7 +929,11 @@ def construct_compound_paths(ug, u_edge_data):
         if in_degree > 1 or out_degree > 1:
             branch_nodes.add(n)
 
-    # print "#", len(all_nodes),len(source_nodes), len(sink_nodes), len(simple_nodes), len(branch_nodes)
+    return source_nodes, sink_nodes, simple_nodes, branch_nodes
+
+def construct_compound_paths_0(ug, u_edge_data, branch_nodes):
+    no_out_edge_printed = set()
+
     compound_paths_0 = []
     for p in list(branch_nodes):
         if ug.out_degree(p) > 1:
@@ -934,6 +945,9 @@ def construct_compound_paths(ug, u_edge_data):
                     (start_node, "NA", end_node, 1.0 * len(bundle_edges) / depth, length, score, bundle_edges))
 
     compound_paths_0.sort(key=lambda x: -len(x[6]))
+    return compound_paths_0
+
+def construct_compound_paths_1(compound_paths_0):
 
     edge_to_cpath = {}
     compound_paths_1 = {}
@@ -979,7 +993,9 @@ def construct_compound_paths(ug, u_edge_data):
             compound_paths_1[(s, v, t)] = width, length, score, bundle_edges
             compound_paths_1[(rs, v, rt)
                              ] = width, length, score, bundle_edges_r
+    return compound_paths_1
 
+def construct_compound_paths_2(compound_paths_1):
     compound_paths_2 = {}
     edge_to_cpath = {}
     for s, v, t in compound_paths_1:
@@ -994,7 +1010,9 @@ def construct_compound_paths(ug, u_edge_data):
         for vv, ww, kk in list(bundle_edges):
             edge_to_cpath.setdefault((vv, ww, kk), set())
             edge_to_cpath[(vv, ww, kk)].add((s, t, v))
+    return compound_paths_2, edge_to_cpath
 
+def construct_compound_paths_3(ug, compound_paths_2, edge_to_cpath):
     compound_paths_3 = {}
     for (k, val) in viewitems(compound_paths_2):
 
@@ -1012,6 +1030,16 @@ def construct_compound_paths(ug, u_edge_data):
             compound_paths_3[k] = val
             if DEBUG_LOG_LEVEL > 1:
                 print("compound", k)
+    return compound_paths_3
+
+def construct_compound_paths(ug, u_edge_data):
+
+    source_nodes, sink_nodes, simple_nodes, branch_nodes = identify_node_types(ug)
+
+    compound_paths_0 = construct_compound_paths_0(ug, u_edge_data, branch_nodes)
+    compound_paths_1 = construct_compound_paths_1(compound_paths_0)
+    compound_paths_2, edge_to_cpath = construct_compound_paths_2(compound_paths_1)
+    compound_paths_3 = construct_compound_paths_3(ug, compound_paths_2, edge_to_cpath)
 
     compound_paths = {}
     for s, v, t in compound_paths_3:
@@ -1022,7 +1050,6 @@ def construct_compound_paths(ug, u_edge_data):
         compound_paths[(s, v, t)] = compound_paths_3[(s, v, t)]
 
     return compound_paths
-
 
 def identify_simple_paths(sg2, edge_data):
     # utg construction phase 1, identify all simple paths
@@ -1416,13 +1443,35 @@ def extract_contigs(ug, u_edge_data, c_path, circular_path, ctg_prefix):
         yield new_contig
         ctg_id += 1
 
-def ovlp_to_graph(args):
-    # transitivity reduction, remove spurs, remove putative edges caused by repeats
-    sg, sg_r, edge_data = generate_string_graph(args)
+def identify_edges_to_remove(compound_paths, ug2):
+    ug2_edges = set(ug2.edges(keys=True))
+    edges_to_remove = set()
+    with open("c_path", "w") as f:
+        for s, v, t in compound_paths:
+            width, length, score, bundle_edges = compound_paths[(s, v, t)]
+            print(s, v, t, width, length, score, "|".join(
+                [e[0] + "~" + e[2] + "~" + e[1] for e in bundle_edges]), file=f)
+            for ss, tt, vv in bundle_edges:
+                if (ss, tt, vv) in ug2_edges:
+                    edges_to_remove.add((ss, tt, vv))
+    return edges_to_remove
 
-    #dual_path = {}
+def identify_short_edges_to_remove(ug2, u_edge_data):
+    edges_to_remove = set()
+    for s, t, v in ug2.edges(keys=True):
+        if ug2.in_degree(s) == 1 and ug2.out_degree(s) == 2 and \
+            ug2.in_degree(t) == 2 and ug2.out_degree(t) == 1:
+            length, score, path_or_edges, type_ = u_edge_data[(s, t, v)]
+            if length < 60000:
+                rs = reverse_end(t)
+                rt = reverse_end(s)
+                rv = reverse_end(v)
+                edges_to_remove.add((s, t, v))
+                edges_to_remove.add((rs, rt, rv))
+    return edges_to_remove
+
+def init_sg2(edge_data):
     sg2 = nx.DiGraph()
-
     for (v, w) in edge_data.keys():
         assert (reverse_end(w), reverse_end(v)) in edge_data
         # if (v, w) in masked_edges:
@@ -1432,13 +1481,48 @@ def ovlp_to_graph(args):
             continue
         label = "%s:%d-%d" % (rid, sp, tp)
         sg2.add_edge(v, w, label=label, length=length, score=score)
+    return sg2
 
-    simple_paths = identify_simple_paths(sg2, edge_data)
+def print_edge_data(u_edge_data):
+    with open("utg_data", "w") as f:
+        for s, t, v in u_edge_data:
+            length, score, path_or_edges, type_ = u_edge_data[(s, t, v)]
+
+            if v == "NA":
+                path_or_edges = "|".join(
+                    [ss + "~" + vv + "~" + tt for ss, tt, vv in path_or_edges])
+            else:
+                path_or_edges = "~".join(path_or_edges)
+            print(s, v, t, type_, length, score, path_or_edges, file=f)
+
+def print_utg_data0(u_edge_data):
+    with open("utg_data0", "w") as f:
+        for s, t, v in u_edge_data:
+            rs = reverse_end(t)
+            rt = reverse_end(s)
+            rv = reverse_end(v)
+            assert (rs, rt, rv) in u_edge_data
+            length, score, path_or_edges, type_ = u_edge_data[(s, t, v)]
+
+            if type_ == "compound":
+                path_or_edges = "|".join(
+                    [ss + "~" + vv + "~" + tt for ss, tt, vv in path_or_edges])
+            else:
+                path_or_edges = "~".join(path_or_edges)
+            print(s, v, t, type_, length, score, path_or_edges, file=f)
+
+def ovlp_to_graph(args):
+    # transitivity reduction, remove spurs, remove putative edges caused by repeats
+    sg, sg_r, edge_data = generate_string_graph(args)
+
+    #dual_path = {}
+    sg2 = init_sg2(edge_data)
 
     ug = nx.MultiDiGraph()
     u_edge_data = {}
     circular_path = set()
 
+    simple_paths = identify_simple_paths(sg2, edge_data)
     for s, v, t in simple_paths:
         length, score, path = simple_paths[(s, v, t)]
         u_edge_data[(s, t, v)] = (length, score, path, "simple")
@@ -1449,38 +1533,14 @@ def ovlp_to_graph(args):
             circular_path.add((s, t, v))
 
     if DEBUG_LOG_LEVEL > 1:
-        with open("utg_data0", "w") as f:
-            for s, t, v in u_edge_data:
-                rs = reverse_end(t)
-                rt = reverse_end(s)
-                rv = reverse_end(v)
-                assert (rs, rt, rv) in u_edge_data
-                length, score, path_or_edges, type_ = u_edge_data[(s, t, v)]
-
-                if type_ == "compound":
-                    path_or_edges = "|".join(
-                        [ss + "~" + vv + "~" + tt for ss, tt, vv in path_or_edges])
-                else:
-                    path_or_edges = "~".join(path_or_edges)
-                print(s, v, t, type_, length, score, path_or_edges, file=f)
+        print_utg_data0(u_edge_data)
 
     ug2 = identify_spurs(ug, u_edge_data, 50000)
     ug2 = remove_dup_simple_path(ug2, u_edge_data)
 
     # phase 2, finding all "consistent" compound paths
     compound_paths = construct_compound_paths(ug2, u_edge_data)
-    compound_path_file = open("c_path", "w")
-
-    ug2_edges = set(ug2.edges(keys=True))
-    edges_to_remove = set()
-    for s, v, t in compound_paths:
-        width, length, score, bundle_edges = compound_paths[(s, v, t)]
-        print(s, v, t, width, length, score, "|".join(
-            [e[0] + "~" + e[2] + "~" + e[1] for e in bundle_edges]), file=compound_path_file)
-        for ss, tt, vv in bundle_edges:
-            if (ss, tt, vv) in ug2_edges:
-                edges_to_remove.add((ss, tt, vv))
-
+    edges_to_remove = identify_edges_to_remove(compound_paths, ug2)
     for s, t, v in edges_to_remove:
         ug2.remove_edge(s, t, v)
         length, score, edges, type_ = u_edge_data[(s, t, v)]
@@ -1500,8 +1560,6 @@ def ovlp_to_graph(args):
         #dual_path[ (s, v, t) ] = (rs, v, rt)
         #dual_path[ (rs, v, rt) ] = (s, v, t)
 
-    compound_path_file.close()
-
     # remove short utg using local flow consistent rule
     r"""
       short UTG like this can be removed, this kind of utg are likely artifects of repeats
@@ -1509,35 +1567,15 @@ def ovlp_to_graph(args):
            \__UTG_>__/
       <____/         \_____<
     """
-    ug_edge_to_remove = set()
-    for s, t, v in ug2.edges(keys=True):
-        if ug2.in_degree(s) == 1 and ug2.out_degree(s) == 2 and \
-           ug2.in_degree(t) == 2 and ug2.out_degree(t) == 1:
-            length, score, path_or_edges, type_ = u_edge_data[(s, t, v)]
-            if length < 60000:
-                rs = reverse_end(t)
-                rt = reverse_end(s)
-                rv = reverse_end(v)
-                ug_edge_to_remove.add((s, t, v))
-                ug_edge_to_remove.add((rs, rt, rv))
-    for s, t, v in list(ug_edge_to_remove):
+    short_edges_to_remove = identify_short_edges_to_remove(ug2, u_edge_data)
+    for s, t, v in list(short_edges_to_remove):
         ug2.remove_edge(s, t, key=v)
         length, score, edges, type_ = u_edge_data[(s, t, v)]
         u_edge_data[(s, t, v)] = length, score, edges, "repeat_bridge"
 
     # Repeat the aggresive spur filtering with slightly larger spur length.
     ug = identify_spurs(ug2, u_edge_data, 80000)
-
-    with open("utg_data", "w") as f:
-        for s, t, v in u_edge_data:
-            length, score, path_or_edges, type_ = u_edge_data[(s, t, v)]
-
-            if v == "NA":
-                path_or_edges = "|".join(
-                    [ss + "~" + vv + "~" + tt for ss, tt, vv in path_or_edges])
-            else:
-                path_or_edges = "~".join(path_or_edges)
-            print(s, v, t, type_, length, score, path_or_edges, file=f)
+    print_edge_data(u_edge_data)
 
     # contig construction from utgs
     c_path = construct_c_path_from_utgs(ug, u_edge_data, sg)
