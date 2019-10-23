@@ -74,7 +74,6 @@ class StringGraph(object):
     def __init__(self):
         self.nodes = {}
         self.edges = {}
-        self.n_mark = {}
         self.e_reduce = {}
         self.repeat_overlap = {}
         self.best_out = {}
@@ -230,7 +229,7 @@ class StringGraph(object):
         """
         transitive reduction
         """
-        n_mark = self.n_mark
+        n_mark = {}
         e_reduce = self.e_reduce
         FUZZ = 500
         for n in self.nodes:
