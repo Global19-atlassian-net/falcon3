@@ -75,7 +75,6 @@ class StringGraph(object):
         self.nodes = {}
         self.edges = {}
         self.e_reduce = {}
-        self.best_out = {}
         self.best_in = {}
 
     def add_node(self, node_name):
@@ -300,7 +299,6 @@ class StringGraph(object):
                 for e in out_edges:
                     if self.e_reduce[(e.in_node.name, e.out_node.name)] != True:
                         best_edges.add((e.in_node.name, e.out_node.name))
-                        self.best_out[v] = e.out_node.name
                         break
 
             in_edges = self.nodes[v].in_edges
