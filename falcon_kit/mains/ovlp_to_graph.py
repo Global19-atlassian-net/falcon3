@@ -863,8 +863,7 @@ def generate_string_graph(args):
         print(sum([1 for c in itervalues(sg.e_reduce) if c == False]))
 
     nxsg, edge_data = init_digraph(sg, chimer_edges, removed_edges, spur_edges)
-    nxsg_r = nxsg.reverse()
-    return nxsg, nxsg_r, edge_data
+    return nxsg, edge_data
 
 def identify_branch_nodes(ug):
 
@@ -1459,7 +1458,7 @@ def print_utg_data0(u_edge_data):
 
 def ovlp_to_graph(args):
     # transitivity reduction, remove spurs, remove putative edges caused by repeats
-    sg, sg_r, edge_data = generate_string_graph(args)
+    sg, edge_data = generate_string_graph(args)
 
     #dual_path = {}
     sg2 = init_sg2(edge_data)
