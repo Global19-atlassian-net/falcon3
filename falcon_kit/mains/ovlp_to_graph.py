@@ -866,26 +866,16 @@ def generate_string_graph(args):
     nxsg_r = nxsg.reverse()
     return nxsg, nxsg_r, edge_data
 
-def identify_node_types(ug):
-    source_nodes = set()
-    sink_nodes = set()
-    simple_nodes = set()
-    branch_nodes = set()
+def identify_branch_nodes(ug):
 
-    all_nodes = ug.nodes()
-    for n in all_nodes:
+    branch_nodes = set()
+    for n in ug.nodes():
         in_degree = len(ug.in_edges(n))
         out_degree = len(ug.out_edges(n))
-        if in_degree == 0:
-            source_nodes.add(n)
-        if out_degree == 0:
-            sink_nodes.add(n)
-        if in_degree == 1 and out_degree == 1:
-            simple_nodes.add(n)
         if in_degree > 1 or out_degree > 1:
             branch_nodes.add(n)
 
-    return source_nodes, sink_nodes, simple_nodes, branch_nodes
+    return branch_nodes
 
 def construct_compound_paths_0(ug, u_edge_data, branch_nodes):
     no_out_edge_printed = set()
@@ -990,7 +980,7 @@ def construct_compound_paths_3(ug, compound_paths_2, edge_to_cpath):
 
 def construct_compound_paths(ug, u_edge_data):
 
-    source_nodes, sink_nodes, simple_nodes, branch_nodes = identify_node_types(ug)
+    branch_nodes = identify_branch_nodes(ug)
 
     compound_paths_0 = construct_compound_paths_0(ug, u_edge_data, branch_nodes)
     compound_paths_1 = construct_compound_paths_1(compound_paths_0)
