@@ -75,7 +75,6 @@ class StringGraph(object):
         self.nodes = {}
         self.edges = {}
         self.e_reduce = {}
-        self.repeat_overlap = {}
         self.best_out = {}
         self.best_in = {}
 
