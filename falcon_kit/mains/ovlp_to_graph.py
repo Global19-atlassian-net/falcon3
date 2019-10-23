@@ -414,46 +414,6 @@ class StringGraph(object):
 
         return removed_edges
 
-    def get_out_edges_for_node(self, name, mask=True):
-        rtn = []
-        for e in self.nodes[name].out_edges:
-            v = e.in_node
-            w = e.out_node
-            if self.e_reduce[(v.name, w.name)] == False:
-                rtn.append(e)
-        return rtn
-
-    def get_in_edges_for_node(self, name, mask=True):
-        rtn = []
-        for e in self.nodes[name].in_edges:
-            v = e.in_node
-            w = e.out_node
-            if self.e_reduce[(v.name, w.name)] == False:
-                rtn.append(e)
-        return rtn
-
-    def get_best_out_edge_for_node(self, name, mask=True):
-        rtn = []
-        for e in self.nodes[name].out_edges:
-            v = e.in_node
-            w = e.out_node
-            if self.e_reduce[(v.name, w.name)] == False:
-                rtn.append(e)
-        rtn.sort(key=lambda e: e.attr["score"])
-
-        return rtn[-1]
-
-    def get_best_in_edge_for_node(self, name, mask=True):
-        rtn = []
-        for e in self.nodes[name].in_edges:
-            v = e.in_node
-            w = e.out_node
-            if self.e_reduce[(v.name, w.name)] == False:
-                rtn.append(e)
-        rtn.sort(key=lambda e: e.attr["score"])
-        return rtn[-1]
-
-
 def reverse_edge(e):
     e1, e2 = e
     return reverse_end(e2), reverse_end(e1)
