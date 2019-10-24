@@ -728,21 +728,24 @@ def init_digraph(sg, chimer_edges, removed_edges, spur_edges):
             identity = e.attr["identity"]
             length = abs(sp - tp)
 
-            if sg.e_reduce[(v, w)] != True:
+            if not sg.e_reduce[(v, w)]:
                 type_ = "G"
-                label = "%s:%d-%d" % (rid, sp, tp)
-                nxsg.add_edge(v, w, label=label, length=length, score=score)
-                edge_data[(v, w)] = (rid, sp, tp, length, score, identity, type_)
-                if w in sg.best_in:
-                    nxsg.nodes[w]["best_in"] = v
             elif (v, w) in chimer_edges:
                 type_ = "C"
             elif (v, w) in removed_edges:
                 type_ = "R"
             elif (v, w) in spur_edges:
                 type_ = "S"
-            elif sg.e_reduce[(v, w)] == True:
+            else:
+                assert sg.e_reduce[(v, w)]
                 type_ = "TR"
+
+            if not sg.e_reduce[(v, w)]:
+                label = "%s:%d-%d" % (rid, sp, tp)
+                nxsg.add_edge(v, w, label=label, length=length, score=score)
+                edge_data[(v, w)] = (rid, sp, tp, length, score, identity, type_)
+                if w in sg.best_in:
+                    nxsg.nodes[w]["best_in"] = v
 
             line = '%s %s %s %5d %5d %5d %5.2f %s' % (
                 v, w, rid, sp, tp, score, identity, type_)
