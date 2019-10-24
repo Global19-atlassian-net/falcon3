@@ -3,6 +3,7 @@ from future.utils import itervalues
 from builtins import object
 import networkx as nx
 import argparse
+import logging
 import os
 import random
 import shlex
@@ -22,6 +23,8 @@ if PYTHONHASHSEED:
     warnings.warn('PYTHONHASHSEED={}'.format(PYTHONHASHSEED))
 
 DEBUG_LOG_LEVEL = 0
+
+LOG = logging.getLogger(__name__)
 
 
 class SGNode(object):
@@ -1576,6 +1579,8 @@ def main(argv=sys.argv):
         help='Prefix for contig names.')
 
     args = parser.parse_args(argv[1:])
+    logging.basicConfig(level=logging.DEBUG)
+    LOG.info("WE HAVE A LOGGER")
     ovlp_to_graph(args)
 
 
