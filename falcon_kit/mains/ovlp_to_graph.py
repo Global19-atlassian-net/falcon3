@@ -3,6 +3,7 @@ from future.utils import itervalues
 from builtins import object
 import networkx as nx
 import argparse
+import logging
 import os
 import random
 import shlex
@@ -21,7 +22,7 @@ if PYTHONHASHSEED:
     import warnings
     warnings.warn('PYTHONHASHSEED={}'.format(PYTHONHASHSEED))
 
-DEBUG_LOG_LEVEL = 0
+LOG = logging.getLogger(__name__)
 
 
 class SGNode(object):
@@ -74,10 +75,7 @@ class StringGraph(object):
     def __init__(self):
         self.nodes = {}
         self.edges = {}
-        self.n_mark = {}
         self.e_reduce = {}
-        self.repeat_overlap = {}
-        self.best_out = {}
         self.best_in = {}
 
     def add_node(self, node_name):
@@ -230,7 +228,7 @@ class StringGraph(object):
         """
         transitive reduction
         """
-        n_mark = self.n_mark
+        n_mark = {}
         e_reduce = self.e_reduce
         FUZZ = 500
         for n in self.nodes:
@@ -302,7 +300,6 @@ class StringGraph(object):
                 for e in out_edges:
                     if self.e_reduce[(e.in_node.name, e.out_node.name)] != True:
                         best_edges.add((e.in_node.name, e.out_node.name))
-                        self.best_out[v] = e.out_node.name
                         break
 
             in_edges = self.nodes[v].in_edges
@@ -314,8 +311,7 @@ class StringGraph(object):
                         self.best_in[v] = e.in_node.name
                         break
 
-        if DEBUG_LOG_LEVEL > 1:
-            print("X", len(best_edges))
+        LOG.debug(f"X {len(best_edges)}")
 
         for (e_n, e) in viewitems(self.edges):
             v = e_n[0]
@@ -418,46 +414,6 @@ class StringGraph(object):
 
         return removed_edges
 
-    def get_out_edges_for_node(self, name, mask=True):
-        rtn = []
-        for e in self.nodes[name].out_edges:
-            v = e.in_node
-            w = e.out_node
-            if self.e_reduce[(v.name, w.name)] == False:
-                rtn.append(e)
-        return rtn
-
-    def get_in_edges_for_node(self, name, mask=True):
-        rtn = []
-        for e in self.nodes[name].in_edges:
-            v = e.in_node
-            w = e.out_node
-            if self.e_reduce[(v.name, w.name)] == False:
-                rtn.append(e)
-        return rtn
-
-    def get_best_out_edge_for_node(self, name, mask=True):
-        rtn = []
-        for e in self.nodes[name].out_edges:
-            v = e.in_node
-            w = e.out_node
-            if self.e_reduce[(v.name, w.name)] == False:
-                rtn.append(e)
-        rtn.sort(key=lambda e: e.attr["score"])
-
-        return rtn[-1]
-
-    def get_best_in_edge_for_node(self, name, mask=True):
-        rtn = []
-        for e in self.nodes[name].in_edges:
-            v = e.in_node
-            w = e.out_node
-            if self.e_reduce[(v.name, w.name)] == False:
-                rtn.append(e)
-        rtn.sort(key=lambda e: e.attr["score"])
-        return rtn[-1]
-
-
 def reverse_edge(e):
     e1, e2 = e
     return reverse_end(e2), reverse_end(e1)
@@ -481,10 +437,7 @@ def find_bundle(ug, u_edge_data, start_node, depth_cutoff, width_cutoff, length_
     v = start_node
     end_node = start_node
 
-    if DEBUG_LOG_LEVEL > 1:
-        print()
-        print()
-        print("start", start_node)
+    LOG.debug(f"\n\nstart {start_node}")
 
     bundle_nodes.add(v)
     for vv, ww, kk in local_graph.out_edges(v, keys=True):
@@ -505,8 +458,7 @@ def find_bundle(ug, u_edge_data, start_node, depth_cutoff, width_cutoff, length_
     converage = False
 
     while 1:
-        if DEBUG_LOG_LEVEL > 1:
-            print("# of tips", len(tips))
+        LOG.debug(f"# of tips {len(tips)}")
 
         if len(tips) > 4:
             converage = False
@@ -515,8 +467,7 @@ def find_bundle(ug, u_edge_data, start_node, depth_cutoff, width_cutoff, length_
         if len(tips) == 1:
             end_node = tips.pop()
 
-            if DEBUG_LOG_LEVEL > 1:
-                print("end", end_node)
+            LOG.debug(f"end {end_node}")
 
             if end_node not in length_to_node:
                 v = end_node
@@ -559,8 +510,7 @@ def find_bundle(ug, u_edge_data, start_node, depth_cutoff, width_cutoff, length_
         length_limit_reached = False
 
         for v in tips_list:
-            if DEBUG_LOG_LEVEL > 1:
-                print("process", v)
+            LOG.debug(f"process {v}")
 
             if len(local_graph.out_edges(v, keys=True)) == 0:  # dead end route
                 if v not in no_out_edge_printed:
@@ -574,9 +524,8 @@ def find_bundle(ug, u_edge_data, start_node, depth_cutoff, width_cutoff, length_
             extend_tip = True
 
             for uu, vv, kk in local_graph.in_edges(v, keys=True):
-                if DEBUG_LOG_LEVEL > 1:
-                    print("in_edges", uu, vv, kk)
-                    print(uu, "in length_to_node",  uu in length_to_node)
+                LOG.debug(f"in_edges {uu} {vv} {kk}")
+                LOG.debug(f"{uu} in length_to_node {uu in length_to_node}")
 
                 if uu not in length_to_node:
                     extend_tip = False
@@ -604,20 +553,17 @@ def find_bundle(ug, u_edge_data, start_node, depth_cutoff, width_cutoff, length_
                 v_updated = False
                 for vv, ww, kk in local_graph.out_edges(v, keys=True):
 
-                    if DEBUG_LOG_LEVEL > 1:
-                        print("test", vv, ww, kk)
+                    LOG.debug(f"test {vv} {ww} {kk}")
 
                     if ww in length_to_node:
                         loop_detect = True
-                        if DEBUG_LOG_LEVEL > 1:
-                            print("loop_detect", ww)
+                        LOG.debug(f"loop_detect {ww}")
                         break
 
                     if (vv, ww, kk) not in bundle_edges and\
                             reverse_end(ww) not in bundle_nodes:
 
-                        if DEBUG_LOG_LEVEL > 1:
-                            print("add", ww)
+                        LOG.debug(f"add {ww}")
 
                         tips.add(ww)
                         bundle_edges.add((vv, ww, kk))
@@ -626,8 +572,7 @@ def find_bundle(ug, u_edge_data, start_node, depth_cutoff, width_cutoff, length_
 
                 if v_updated:
 
-                    if DEBUG_LOG_LEVEL > 1:
-                        print("remove", v)
+                    LOG.debug(f"remove {v}")
 
                     tips.remove(v)
 
@@ -658,105 +603,13 @@ def find_bundle(ug, u_edge_data, start_node, depth_cutoff, width_cutoff, length_
 
     data_r = None
 
-    if DEBUG_LOG_LEVEL > 1:
-        print(converage, data, data_r)
+    LOG.debug(f"{converage} {data} {data_r}")
     return converage, data, data_r
 
-
-def generate_string_graph(args):
-    overlap_file = args.overlap_file
-
-    contained_reads = set()
-    chimer_ids = set()
-
-    filter_reads = False
-
-    seqs = set()
-
-    G = nx.Graph()
-    edges = set()
-    overlap_data = []
-    contained_reads = set()
-    overlap_count = {}
-
-    # loop through the overlapping data to load the data in the a python array
-    # contained reads are identified
-
-    def process_fields(l):
-            # work around for some ill formed data recored
-            # if len(l) != 13:
-            #    continue
-            f_id, g_id, score, identity = l[:4]
-
-            if f_id == g_id:  # don't need self-self overlapping
-                return
-            if filter_reads:
-                if g_id not in seqs:
-                    return
-                if f_id not in seqs:
-                    return
-            score = int(score)
-            identity = float(identity)
-            contained = l[12]
-            if contained == "contained":
-                contained_reads.add(f_id)
-                return
-            if contained == "contains":
-                contained_reads.add(g_id)
-                return
-            if contained == "none":
-                return
-            if identity < args.min_idt:  # only take record with >96% identity as overlapped reads
-                return
-            f_strain, f_start, f_end, f_len = (int(c) for c in l[4:8])
-            g_strain, g_start, g_end, g_len = (int(c) for c in l[8:12])
-
-            # only used reads longer than the 4kb for assembly
-            if f_len < args.min_len:
-                return
-            if g_len < args.min_len:
-                return
-            """
-            # double check for proper overlap
-            # this is not necessary when using DALIGNER for overlapper
-            # it may be useful if other overlappers give fuzzier alignment boundary
-            if f_start > 24 and f_len - f_end > 24:  # allow 24 base tolerance on both sides of the overlapping
-                return
-            if g_start > 24 and g_len - g_end > 24:
-                return
-            if g_strain == 0:
-                if f_start < 24 and g_len - g_end > 24:
-                    return
-                if g_start < 24 and f_len - f_end > 24:
-                    return
-            else:
-                if f_start < 24 and g_start > 24:
-                    return
-                if g_start < 24 and f_start > 24:
-                    return
-            """
-            overlap_data.append((f_id, g_id, score, identity,
-                                 f_strain, f_start, f_end, f_len,
-                                 g_strain, g_start, g_end, g_len))
-            overlap_count[f_id] = overlap_count.get(f_id, 0) + 1
-            overlap_count[g_id] = overlap_count.get(g_id, 0) + 1
-
-    with open(overlap_file) as f:
-        n = 0
-        for line in f:
-            if line.startswith('-'):
-                break
-            l = line.strip().split()
-            process_fields(l)
-            n += 1
-        else:
-            # This happens only if we did not 'break' from the for-loop.
-            msg = 'No end-of-file marker for overlap_file {!r} after {} lines.'.format(
-                overlap_file, n)
-            raise Exception(msg)
+def init_string_graph(overlap_data, contained_reads):
+    sg = StringGraph()
 
     overlap_set = set()
-    sg = StringGraph()
     for od in overlap_data:
         f_id, g_id, score, identity = od[:4]
         if f_id in contained_reads:
@@ -849,12 +702,131 @@ def generate_string_graph(args):
                             identity=identity)
 
     sg.init_reduce_dict()
-
     sg.mark_tr_edges()  # mark those edges that transitive redundant
+    return sg
 
-    if DEBUG_LOG_LEVEL > 1:
-        print(sum([1 for c in itervalues(sg.e_reduce) if c == True]))
-        print(sum([1 for c in itervalues(sg.e_reduce) if c == False]))
+def init_digraph(sg, chimer_edges, removed_edges, spur_edges):
+    nxsg = nx.DiGraph()
+    edge_data = {}
+    with open("sg_edges_list", "w") as out_f:
+        for v, w in sg.edges: # sort, or OrderedDict
+            e = sg.edges[(v, w)]
+            rid, sp, tp = e.attr["label"]
+            score = e.attr["score"]
+            identity = e.attr["identity"]
+            length = abs(sp - tp)
+
+            if not sg.e_reduce[(v, w)]:
+                type_ = "G"
+            elif (v, w) in chimer_edges:
+                type_ = "C"
+            elif (v, w) in removed_edges:
+                type_ = "R"
+            elif (v, w) in spur_edges:
+                type_ = "S"
+            else:
+                assert sg.e_reduce[(v, w)]
+                type_ = "TR"
+
+            if not sg.e_reduce[(v, w)]:
+                label = "%s:%d-%d" % (rid, sp, tp)
+                nxsg.add_edge(v, w, label=label, length=length, score=score)
+                edge_data[(v, w)] = (rid, sp, tp, length, score, identity, type_)
+                if w in sg.best_in:
+                    nxsg.nodes[w]["best_in"] = v
+
+            line = '%s %s %s %5d %5d %5d %5.2f %s' % (
+                v, w, rid, sp, tp, score, identity, type_)
+            print(line, file=out_f)
+
+    return nxsg, edge_data
+
+
+def parse_overlap_file(args):
+
+    overlap_data = []
+    contained_reads = set()
+
+    # loop through the overlapping data to load the data in the a python array
+    # contained reads are identified
+
+    def process_fields(l):
+        # work around for some ill formed data recored
+        # if len(l) != 13:
+        #    continue
+        f_id, g_id, score, identity = l[:4]
+
+        if f_id == g_id:  # don't need self-self overlapping
+            return
+        score = int(score)
+        identity = float(identity)
+        contained = l[12]
+        if contained == "contained":
+            contained_reads.add(f_id)
+            return
+        if contained == "contains":
+            contained_reads.add(g_id)
+            return
+        if contained == "none":
+            return
+        if identity < args.min_idt:  # only take record with >96% identity as overlapped reads
+            return
+        f_strain, f_start, f_end, f_len = (int(c) for c in l[4:8])
+        g_strain, g_start, g_end, g_len = (int(c) for c in l[8:12])
+
+        # only used reads longer than the 4kb for assembly
+        if f_len < args.min_len:
+            return
+        if g_len < args.min_len:
+            return
+        """
+        # double check for proper overlap
+        # this is not necessary when using DALIGNER for overlapper
+        # it may be useful if other overlappers give fuzzier alignment boundary
+        if f_start > 24 and f_len - f_end > 24:  # allow 24 base tolerance on both sides of the overlapping
+            return
+        if g_start > 24 and g_len - g_end > 24:
+            return
+        if g_strain == 0:
+            if f_start < 24 and g_len - g_end > 24:
+                return
+            if g_start < 24 and f_len - f_end > 24:
+                return
+        else:
+            if f_start < 24 and g_start > 24:
+                return
+            if g_start < 24 and f_start > 24:
+                return
+        """
+        overlap_data.append((f_id, g_id, score, identity,
+                            f_strain, f_start, f_end, f_len,
+                            g_strain, g_start, g_end, g_len))
+
+    overlap_file = args.overlap_file
+    with open(overlap_file) as f:
+        n = 0
+        for line in f:
+            if line.startswith('-'):
+                break
+            l = line.strip().split()
+            process_fields(l)
+            n += 1
+        else:
+            # This happens only if we did not 'break' from the for-loop.
+            msg = 'No end-of-file marker for overlap_file {!r} after {} lines.'.format(
+                overlap_file, n)
+            raise Exception(msg)
+
+    return overlap_data, contained_reads
+
+def generate_string_graph(args):
+
+    overlap_data, contained_reads = parse_overlap_file(args)
+
+    sg = init_string_graph(overlap_data, contained_reads)
+
+    LOG.debug("{}".format(sum([1 for c in itervalues(sg.e_reduce) if c])))
+    LOG.debug("{}".format(sum([1 for c in itervalues(sg.e_reduce) if not c])))
 
     if not args.disable_chimer_bridge_removal:
         chimer_nodes, chimer_edges = sg.mark_chimer_edges()
@@ -877,66 +849,25 @@ def generate_string_graph(args):
 
     spur_edges.update(sg.mark_spur_edge())
 
-    if DEBUG_LOG_LEVEL > 1:
-        print(sum([1 for c in itervalues(sg.e_reduce) if c == False]))
+    LOG.debug('{}'.format(sum([1 for c in itervalues(sg.e_reduce) if not c])))
 
-    out_f = open("sg_edges_list", "w")
-    nxsg = nx.DiGraph()
-    edge_data = {}
-    for v, w in sg.edges: # sort, or OrderedDict
-        e = sg.edges[(v, w)]
-        rid, sp, tp = e.attr["label"]
-        score = e.attr["score"]
-        identity = e.attr["identity"]
-        length = abs(sp - tp)
+    nxsg, edge_data = init_digraph(sg, chimer_edges, removed_edges, spur_edges)
+    return nxsg, edge_data
 
-        if sg.e_reduce[(v, w)] != True:
-            type_ = "G"
-            label = "%s:%d-%d" % (rid, sp, tp)
-            nxsg.add_edge(v, w, label=label, length=length, score=score)
-            edge_data[(v, w)] = (rid, sp, tp, length, score, identity, type_)
-            if w in sg.best_in:
-                nxsg.nodes[w]["best_in"] = v
-        elif (v, w) in chimer_edges:
-            type_ = "C"
-        elif (v, w) in removed_edges:
-            type_ = "R"
-        elif (v, w) in spur_edges:
-            type_ = "S"
-        elif sg.e_reduce[(v, w)] == True:
-            type_ = "TR"
+def identify_branch_nodes(ug):
 
-        line = '%s %s %s %5d %5d %5d %5.2f %s' % (
-            v, w, rid, sp, tp, score, identity, type_)
-        print(line, file=out_f)
-
-    out_f.close()
-    nxsg_r = nxsg.reverse()
-
-    return nxsg, nxsg_r, edge_data
-
-
-def construct_compound_paths(ug, u_edge_data):
-    no_out_edge_printed = set()
-    source_nodes = set()
-    sink_nodes = set()
-    simple_nodes = set()
     branch_nodes = set()
-
-    all_nodes = ug.nodes()
-    for n in all_nodes:
+    for n in ug.nodes():
         in_degree = len(ug.in_edges(n))
         out_degree = len(ug.out_edges(n))
-        if in_degree == 0:
-            source_nodes.add(n)
-        if out_degree == 0:
-            sink_nodes.add(n)
-        if in_degree == 1 and out_degree == 1:
-            simple_nodes.add(n)
         if in_degree > 1 or out_degree > 1:
             branch_nodes.add(n)
 
-    # print "#", len(all_nodes),len(source_nodes), len(sink_nodes), len(simple_nodes), len(branch_nodes)
+    return branch_nodes
+
+def construct_compound_paths_0(ug, u_edge_data, branch_nodes):
+    no_out_edge_printed = set()
+
     compound_paths_0 = []
     for p in list(branch_nodes):
         if ug.out_degree(p) > 1:
@@ -948,32 +879,31 @@ def construct_compound_paths(ug, u_edge_data):
                     (start_node, "NA", end_node, 1.0 * len(bundle_edges) / depth, length, score, bundle_edges))
 
     compound_paths_0.sort(key=lambda x: -len(x[6]))
+    return compound_paths_0
+
+def construct_compound_paths_1(compound_paths_0):
 
     edge_to_cpath = {}
     compound_paths_1 = {}
     for s, v, t, width, length, score, bundle_edges in compound_paths_0:
-        if DEBUG_LOG_LEVEL > 1:
-            print("constructing utg, test ", s, v, t)
+        LOG.debug(f"constructing utg, test  {s} {v} {t}")
 
         overlapped = False
         for vv, ww, kk in list(bundle_edges):
             if (vv, ww, kk) in edge_to_cpath:
-                if DEBUG_LOG_LEVEL > 1:
-                    print("remove overlapped utg", (s, v, t), (vv, ww, kk))
+                LOG.debug(f"remove overlapped utg {(s, v, t)} {(vv, ww, kk)}")
                 overlapped = True
                 break
             rvv = reverse_end(vv)
             rww = reverse_end(ww)
             rkk = reverse_end(kk)
             if (rww, rvv, rkk) in edge_to_cpath:
-                if DEBUG_LOG_LEVEL > 1:
-                    print("remove overlapped r utg", (s, v, t),  (rww, rvv, rkk))
+                LOG.debug(f"remove overlapped r utg {(s, v, t)} {(rww, rvv, rkk)}")
                 overlapped = True
                 break
 
         if not overlapped:
-            if DEBUG_LOG_LEVEL > 1:
-                print("constructing", s, v, t)
+            LOG.debug(f"constructing {s} {v} {t}")
 
             bundle_edges_r = []
             rs = reverse_end(t)
@@ -993,22 +923,25 @@ def construct_compound_paths(ug, u_edge_data):
             compound_paths_1[(s, v, t)] = width, length, score, bundle_edges
             compound_paths_1[(rs, v, rt)
                              ] = width, length, score, bundle_edges_r
+    return compound_paths_1
 
+def construct_compound_paths_2(compound_paths_1):
     compound_paths_2 = {}
     edge_to_cpath = {}
     for s, v, t in compound_paths_1:
         rs = reverse_end(t)
         rt = reverse_end(s)
         if (rs, "NA", rt) not in compound_paths_1:
-            if DEBUG_LOG_LEVEL > 1:
-                print("non_compliment bundle", s, v, t, len(compound_paths_1[(s, v, t)][-1]))
+            LOG.debug(f"non_compliment bundle {s} {v} {t} {len(compound_paths_1[(s, v, t)][-1])}")
             continue
         width, length, score, bundle_edges = compound_paths_1[(s, v, t)]
         compound_paths_2[(s, v, t)] = width, length, score, bundle_edges
         for vv, ww, kk in list(bundle_edges):
             edge_to_cpath.setdefault((vv, ww, kk), set())
             edge_to_cpath[(vv, ww, kk)].add((s, t, v))
+    return compound_paths_2, edge_to_cpath
 
+def construct_compound_paths_3(ug, compound_paths_2, edge_to_cpath):
     compound_paths_3 = {}
     for (k, val) in viewitems(compound_paths_2):
 
@@ -1024,8 +957,17 @@ def construct_compound_paths(ug, u_edge_data):
 
         if not contained:
             compound_paths_3[k] = val
-            if DEBUG_LOG_LEVEL > 1:
-                print("compound", k)
+            LOG.debug(f"compound {k}")
+    return compound_paths_3
+
+def construct_compound_paths(ug, u_edge_data):
+
+    branch_nodes = identify_branch_nodes(ug)
+
+    compound_paths_0 = construct_compound_paths_0(ug, u_edge_data, branch_nodes)
+    compound_paths_1 = construct_compound_paths_1(compound_paths_0)
+    compound_paths_2, edge_to_cpath = construct_compound_paths_2(compound_paths_1)
+    compound_paths_3 = construct_compound_paths_3(ug, compound_paths_2, edge_to_cpath)
 
     compound_paths = {}
     for s, v, t in compound_paths_3:
@@ -1036,7 +978,6 @@ def construct_compound_paths(ug, u_edge_data):
         compound_paths[(s, v, t)] = compound_paths_3[(s, v, t)]
 
     return compound_paths
-
 
 def identify_simple_paths(sg2, edge_data):
     # utg construction phase 1, identify all simple paths
@@ -1059,30 +1000,28 @@ def identify_simple_paths(sg2, edge_data):
 
     free_edges = set(sg2.edges())
 
-    if DEBUG_LOG_LEVEL > 1:
+    if LOG.getEffectiveLevel() >= logging.DEBUG:
         for s in list(simple_nodes):
-            print("simple_node", s)
+            LOG.debug(f"simple_node {s}")
         for s in list(s_nodes):
-            print("s_node", s)
+            LOG.debug(f"s_node {s}")
         for s in list(t_nodes):
-            print("t_node", s)
+            LOG.debug(f"t_node {s}")
 
         for v, w in free_edges:
             if (reverse_end(w), reverse_end(v)) not in free_edges:
-                print("bug", v, w)
+                LOG.debug(f"bug {v} {w}")
                 print(reverse_end(w), reverse_end(v))
 
     while free_edges:
         if s_nodes:
             n = s_nodes.pop()
-            if DEBUG_LOG_LEVEL > 1:
-                print("initial utg 1", n)
+            LOG.debug(f"initial utg 1 {n}")
         else:
             e = free_edges.pop()
             free_edges.add(e)
             n = e[0]
-            if DEBUG_LOG_LEVEL > 1:
-                print("initial utg 2", n)
+            LOG.debug(f"initial utg 2 {n}")
 
         path = []
         path_length = 0
@@ -1144,8 +1083,7 @@ def identify_simple_paths(sg2, edge_data):
             simple_paths[(r_path[0], rw0, rv0)
                          ] = r_path_length, r_path_score, r_path
 
-            if DEBUG_LOG_LEVEL > 1:
-                print(path_length, path_score, path)
+            LOG.debug(f"{path_length} {path_score} {path}")
 
             #dual_path[ (r_path[0], rw0, rv0) ] = (v0, w0, path[-1])
             #dual_path[ (v0, w0, path[-1]) ] = (r_path[0], rw0, rv0)
@@ -1259,10 +1197,8 @@ def construct_c_path_from_utgs(ug, u_edge_data, sg):
     # Side-effects: None, I think.
 
     s_nodes = set()
-    #t_nodes = set()
     simple_nodes = set()
     simple_out = set()
-    #simple_in = set()
 
     all_nodes = ug.nodes()
     for n in all_nodes:
@@ -1273,12 +1209,8 @@ def construct_c_path_from_utgs(ug, u_edge_data, sg):
         else:
             if out_degree != 0:
                 s_nodes.add(n)
-            # if in_degree != 0:
-            #    t_nodes.add(n)
         if out_degree == 1:
             simple_out.add(n)
-        # if in_degree == 1:
-        #    simple_in.add(n)
 
     c_path = []
 
@@ -1302,8 +1234,7 @@ def construct_c_path_from_utgs(ug, u_edge_data, sg):
             path_score = 0
             path_nodes = set()
             path_nodes.add(s)
-            if DEBUG_LOG_LEVEL > 1:
-                print("check 1", s, t, v)
+            LOG.debug(f"check 1 {s} {t} {v}")
             path_key = t
             t0 = s
             while t in simple_out:
@@ -1357,14 +1288,12 @@ def construct_c_path_from_utgs(ug, u_edge_data, sg):
 
             c_path.append((path_start, path_key, path_end,
                            path_length, path_score, path, len(path)))
-            if DEBUG_LOG_LEVEL > 1:
-                print("c_path", path_start, path_key, path_end, path_length, path_score, len(path))
+            LOG.debug(f"c_path {path_start} {path_key} {path_end} {path_length} {path_score} {len(path)}")
             for e in path:
                 if e in free_edges:
                     free_edges.remove(e)
 
-    if DEBUG_LOG_LEVEL > 1:
-        print("left over edges:", len(free_edges))
+    LOG.debug(f"left over edges: {len(free_edges)}")
     return c_path
 
 def extract_contigs(ug, u_edge_data, c_path, circular_path, ctg_prefix):
@@ -1436,13 +1365,35 @@ def extract_contigs(ug, u_edge_data, c_path, circular_path, ctg_prefix):
         yield new_contig
         ctg_id += 1
 
-def ovlp_to_graph(args):
-    # transitivity reduction, remove spurs, remove putative edges caused by repeats
-    sg, sg_r, edge_data = generate_string_graph(args)
+def identify_edges_to_remove(compound_paths, ug2):
+    ug2_edges = set(ug2.edges(keys=True))
+    edges_to_remove = set()
+    with open("c_path", "w") as f:
+        for s, v, t in compound_paths:
+            width, length, score, bundle_edges = compound_paths[(s, v, t)]
+            print(s, v, t, width, length, score, "|".join(
+                [e[0] + "~" + e[2] + "~" + e[1] for e in bundle_edges]), file=f)
+            for ss, tt, vv in bundle_edges:
+                if (ss, tt, vv) in ug2_edges:
+                    edges_to_remove.add((ss, tt, vv))
+    return edges_to_remove
 
-    #dual_path = {}
+def identify_short_edges_to_remove(ug2, u_edge_data):
+    edges_to_remove = set()
+    for s, t, v in ug2.edges(keys=True):
+        if ug2.in_degree(s) == 1 and ug2.out_degree(s) == 2 and \
+            ug2.in_degree(t) == 2 and ug2.out_degree(t) == 1:
+            length, score, path_or_edges, type_ = u_edge_data[(s, t, v)]
+            if length < 60000:
+                rs = reverse_end(t)
+                rt = reverse_end(s)
+                rv = reverse_end(v)
+                edges_to_remove.add((s, t, v))
+                edges_to_remove.add((rs, rt, rv))
+    return edges_to_remove
+
+def init_sg2(edge_data):
     sg2 = nx.DiGraph()
-
     for (v, w) in edge_data.keys():
         assert (reverse_end(w), reverse_end(v)) in edge_data
         # if (v, w) in masked_edges:
@@ -1452,13 +1403,48 @@ def ovlp_to_graph(args):
             continue
         label = "%s:%d-%d" % (rid, sp, tp)
         sg2.add_edge(v, w, label=label, length=length, score=score)
+    return sg2
 
-    simple_paths = identify_simple_paths(sg2, edge_data)
+def print_edge_data(u_edge_data):
+    with open("utg_data", "w") as f:
+        for s, t, v in u_edge_data:
+            length, score, path_or_edges, type_ = u_edge_data[(s, t, v)]
+
+            if v == "NA":
+                path_or_edges = "|".join(
+                    [ss + "~" + vv + "~" + tt for ss, tt, vv in path_or_edges])
+            else:
+                path_or_edges = "~".join(path_or_edges)
+            print(s, v, t, type_, length, score, path_or_edges, file=f)
+
+def print_utg_data0(u_edge_data):
+    with open("utg_data0", "w") as f:
+        for s, t, v in u_edge_data:
+            rs = reverse_end(t)
+            rt = reverse_end(s)
+            rv = reverse_end(v)
+            assert (rs, rt, rv) in u_edge_data
+            length, score, path_or_edges, type_ = u_edge_data[(s, t, v)]
+
+            if type_ == "compound":
+                path_or_edges = "|".join(
+                    [ss + "~" + vv + "~" + tt for ss, tt, vv in path_or_edges])
+            else:
+                path_or_edges = "~".join(path_or_edges)
+            print(s, v, t, type_, length, score, path_or_edges, file=f)
+
+def ovlp_to_graph(args):
+    # transitivity reduction, remove spurs, remove putative edges caused by repeats
+    sg, edge_data = generate_string_graph(args)
+
+    #dual_path = {}
+    sg2 = init_sg2(edge_data)
 
     ug = nx.MultiDiGraph()
     u_edge_data = {}
     circular_path = set()
 
+    simple_paths = identify_simple_paths(sg2, edge_data)
     for s, v, t in simple_paths:
         length, score, path = simple_paths[(s, v, t)]
         u_edge_data[(s, t, v)] = (length, score, path, "simple")
@@ -1468,39 +1454,15 @@ def ovlp_to_graph(args):
         else:
             circular_path.add((s, t, v))
 
-    if DEBUG_LOG_LEVEL > 1:
-        with open("utg_data0", "w") as f:
-            for s, t, v in u_edge_data:
-                rs = reverse_end(t)
-                rt = reverse_end(s)
-                rv = reverse_end(v)
-                assert (rs, rt, rv) in u_edge_data
-                length, score, path_or_edges, type_ = u_edge_data[(s, t, v)]
-
-                if type_ == "compound":
-                    path_or_edges = "|".join(
-                        [ss + "~" + vv + "~" + tt for ss, tt, vv in path_or_edges])
-                else:
-                    path_or_edges = "~".join(path_or_edges)
-                print(s, v, t, type_, length, score, path_or_edges, file=f)
+    if LOG.getEffectiveLevel() >= logging.DEBUG:
+        print_utg_data0(u_edge_data)
 
     ug2 = identify_spurs(ug, u_edge_data, 50000)
     ug2 = remove_dup_simple_path(ug2, u_edge_data)
 
     # phase 2, finding all "consistent" compound paths
     compound_paths = construct_compound_paths(ug2, u_edge_data)
-    compound_path_file = open("c_path", "w")
-
-    ug2_edges = set(ug2.edges(keys=True))
-    edges_to_remove = set()
-    for s, v, t in compound_paths:
-        width, length, score, bundle_edges = compound_paths[(s, v, t)]
-        print(s, v, t, width, length, score, "|".join(
-            [e[0] + "~" + e[2] + "~" + e[1] for e in bundle_edges]), file=compound_path_file)
-        for ss, tt, vv in bundle_edges:
-            if (ss, tt, vv) in ug2_edges:
-                edges_to_remove.add((ss, tt, vv))
-
+    edges_to_remove = identify_edges_to_remove(compound_paths, ug2)
     for s, t, v in edges_to_remove:
         ug2.remove_edge(s, t, v)
         length, score, edges, type_ = u_edge_data[(s, t, v)]
@@ -1520,8 +1482,6 @@ def ovlp_to_graph(args):
         #dual_path[ (s, v, t) ] = (rs, v, rt)
         #dual_path[ (rs, v, rt) ] = (s, v, t)
 
-    compound_path_file.close()
-
     # remove short utg using local flow consistent rule
     r"""
       short UTG like this can be removed, this kind of utg are likely artifects of repeats
@@ -1529,38 +1489,15 @@ def ovlp_to_graph(args):
            \__UTG_>__/
       <____/         \_____<
     """
-    ug_edge_to_remove = set()
-    for s, t, v in ug2.edges(keys=True):
-        if ug2.in_degree(s) == 1 and ug2.out_degree(s) == 2 and \
-           ug2.in_degree(t) == 2 and ug2.out_degree(t) == 1:
-            length, score, path_or_edges, type_ = u_edge_data[(s, t, v)]
-            if length < 60000:
-                rs = reverse_end(t)
-                rt = reverse_end(s)
-                rv = reverse_end(v)
-                ug_edge_to_remove.add((s, t, v))
-                ug_edge_to_remove.add((rs, rt, rv))
-    for s, t, v in list(ug_edge_to_remove):
+    short_edges_to_remove = identify_short_edges_to_remove(ug2, u_edge_data)
+    for s, t, v in list(short_edges_to_remove):
         ug2.remove_edge(s, t, key=v)
         length, score, edges, type_ = u_edge_data[(s, t, v)]
         u_edge_data[(s, t, v)] = length, score, edges, "repeat_bridge"
 
-    ug = ug2
-
     # Repeat the aggresive spur filtering with slightly larger spur length.
-    ug2 = identify_spurs(ug, u_edge_data, 80000)
-    ug = ug2
-
-    with open("utg_data", "w") as f:
-        for s, t, v in u_edge_data:
-            length, score, path_or_edges, type_ = u_edge_data[(s, t, v)]
-
-            if v == "NA":
-                path_or_edges = "|".join(
-                    [ss + "~" + vv + "~" + tt for ss, tt, vv in path_or_edges])
-            else:
-                path_or_edges = "~".join(path_or_edges)
-            print(s, v, t, type_, length, score, path_or_edges, file=f)
+    ug = identify_spurs(ug2, u_edge_data, 80000)
+    print_edge_data(u_edge_data)
 
     # contig construction from utgs
     c_path = construct_c_path_from_utgs(ug, u_edge_data, sg)
@@ -1613,6 +1550,7 @@ def main(argv=sys.argv):
         help='Prefix for contig names.')
 
     args = parser.parse_args(argv[1:])
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout, format='%(msg)s')
     ovlp_to_graph(args)
 
 
