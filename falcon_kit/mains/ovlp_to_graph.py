@@ -742,8 +742,7 @@ def init_digraph(sg, chimer_edges, removed_edges, spur_edges):
     return nxsg, edge_data
 
 
-def parse_overlap_file(args):
-
+def parse_overlap_file(overlap_file, min_idt, min_len):
     overlap_data = []
     contained_reads = set()
 
@@ -769,15 +768,15 @@ def parse_overlap_file(args):
             return
         if contained == "none":
             return
-        if identity < args.min_idt:  # only take record with >96% identity as overlapped reads
+        if identity < min_idt:  # only take record with >96% identity as overlapped reads
             return
         f_strain, f_start, f_end, f_len = (int(c) for c in l[4:8])
         g_strain, g_start, g_end, g_len = (int(c) for c in l[8:12])
 
         # only used reads longer than the 4kb for assembly
-        if f_len < args.min_len:
+        if f_len < min_len:
             return
-        if g_len < args.min_len:
+        if g_len < min_len:
             return
         """
         # double check for proper overlap
@@ -802,7 +801,6 @@ def parse_overlap_file(args):
                             f_strain, f_start, f_end, f_len,
                             g_strain, g_start, g_end, g_len))
 
-    overlap_file = args.overlap_file
     with open(overlap_file) as f:
         n = 0
         for line in f:
@@ -819,16 +817,11 @@ def parse_overlap_file(args):
 
     return overlap_data, contained_reads
 
-def generate_string_graph(args):
-
-    overlap_data, contained_reads = parse_overlap_file(args)
-
-    sg = init_string_graph(overlap_data, contained_reads)
-
+def generate_nx_string_graph(sg, lfc=False, disable_chimer_bridge_removal=False):
     LOG.debug("{}".format(sum([1 for c in itervalues(sg.e_reduce) if c])))
     LOG.debug("{}".format(sum([1 for c in itervalues(sg.e_reduce) if not c])))
 
-    if not args.disable_chimer_bridge_removal:
+    if not disable_chimer_bridge_removal:
         chimer_nodes, chimer_edges = sg.mark_chimer_edges()
 
         with open("chimers_nodes", "w") as f:
@@ -841,7 +834,7 @@ def generate_string_graph(args):
     spur_edges = sg.mark_spur_edge()
 
     removed_edges = set()
-    if args.lfc == True:
+    if lfc == True:
         removed_edges = sg.resolve_repeat_edges()
     else:
         # mark those edges that are best overlap edges
@@ -1435,16 +1428,19 @@ def print_utg_data0(u_edge_data):
 
 def ovlp_to_graph(args):
     # transitivity reduction, remove spurs, remove putative edges caused by repeats
-    sg, edge_data = generate_string_graph(args)
+    overlap_data, contained_reads = parse_overlap_file(args.overlap_file, min_idt=args.min_idt, min_len=args.min_len)
+    sg = init_string_graph(overlap_data, contained_reads)
+    nxsg, edge_data = generate_nx_string_graph(sg, args.lfc, args.disable_chimer_bridge_removal)
+    del sg, overlap_data, contained_reads
 
     #dual_path = {}
-    sg2 = init_sg2(edge_data)
+    nxsg2 = init_sg2(edge_data)
 
     ug = nx.MultiDiGraph()
     u_edge_data = {}
     circular_path = set()
 
-    simple_paths = identify_simple_paths(sg2, edge_data)
+    simple_paths = identify_simple_paths(nxsg2, edge_data)
     for s, v, t in simple_paths:
         length, score, path = simple_paths[(s, v, t)]
         u_edge_data[(s, t, v)] = (length, score, path, "simple")
@@ -1500,7 +1496,7 @@ def ovlp_to_graph(args):
     print_edge_data(u_edge_data)
 
     # contig construction from utgs
-    c_path = construct_c_path_from_utgs(ug, u_edge_data, sg)
+    c_path = construct_c_path_from_utgs(ug, u_edge_data, nxsg)
 
     # Sorting contig paths by length.
     c_path.sort(key=lambda x: -x[3])
