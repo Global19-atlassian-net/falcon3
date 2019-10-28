@@ -606,16 +606,12 @@ def find_bundle(ug, u_edge_data, start_node, depth_cutoff, width_cutoff, length_
     LOG.debug(f"{converage} {data} {data_r}")
     return converage, data, data_r
 
-def init_string_graph(overlap_data, contained_reads):
+def init_string_graph(overlap_data):
     sg = StringGraph()
 
     overlap_set = set()
     for od in overlap_data:
         f_id, g_id, score, identity = od[:4]
-        if f_id in contained_reads:
-            continue
-        if g_id in contained_reads:
-            continue
         f_s, f_b, f_e, f_l = od[4:8]
         g_s, g_b, g_e, g_l = od[8:12]
         overlap_pair = [f_id, g_id]
@@ -742,64 +738,8 @@ def init_digraph(sg, chimer_edges, removed_edges, spur_edges):
     return nxsg, edge_data
 
 
-def parse_overlap_file(overlap_file, min_idt, min_len):
-    overlap_data = []
-    contained_reads = set()
-
+def yield_from_overlap_file(overlap_file):
     # loop through the overlapping data to load the data in the a python array
-    # contained reads are identified
-
-    def process_fields(l):
-        # work around for some ill formed data recored
-        # if len(l) != 13:
-        #    continue
-        f_id, g_id, score, identity = l[:4]
-
-        if f_id == g_id:  # don't need self-self overlapping
-            return
-        score = int(score)
-        identity = float(identity)
-        contained = l[12]
-        if contained == "contained":
-            contained_reads.add(f_id)
-            return
-        if contained == "contains":
-            contained_reads.add(g_id)
-            return
-        if contained == "none":
-            return
-        if identity < min_idt:  # only take record with >96% identity as overlapped reads
-            return
-        f_strain, f_start, f_end, f_len = (int(c) for c in l[4:8])
-        g_strain, g_start, g_end, g_len = (int(c) for c in l[8:12])
-
-        # only used reads longer than the 4kb for assembly
-        if f_len < min_len:
-            return
-        if g_len < min_len:
-            return
-        """
-        # double check for proper overlap
-        # this is not necessary when using DALIGNER for overlapper
-        # it may be useful if other overlappers give fuzzier alignment boundary
-        if f_start > 24 and f_len - f_end > 24:  # allow 24 base tolerance on both sides of the overlapping
-            return
-        if g_start > 24 and g_len - g_end > 24:
-            return
-        if g_strain == 0:
-            if f_start < 24 and g_len - g_end > 24:
-                return
-            if g_start < 24 and f_len - f_end > 24:
-                return
-        else:
-            if f_start < 24 and g_start > 24:
-                return
-            if g_start < 24 and f_start > 24:
-                return
-        """
-        overlap_data.append((f_id, g_id, score, identity,
-                            f_strain, f_start, f_end, f_len,
-                            g_strain, g_start, g_end, g_len))
 
     with open(overlap_file) as f:
         n = 0
@@ -807,15 +747,18 @@ def parse_overlap_file(overlap_file, min_idt, min_len):
             if line.startswith('-'):
                 break
             l = line.strip().split()
-            process_fields(l)
-            n += 1
-        else:
-            # This happens only if we did not 'break' from the for-loop.
-            msg = 'No end-of-file marker for overlap_file {!r} after {} lines.'.format(
-                overlap_file, n)
-            raise Exception(msg)
+            f_id, g_id, score, identity = l[:4]
 
-    return overlap_data, contained_reads
+            score = int(score)
+            identity = float(identity)
+            #contained_etc = l[12]
+            f_strain, f_start, f_end, f_len = (int(c) for c in l[4:8])
+            g_strain, g_start, g_end, g_len = (int(c) for c in l[8:12])
+
+            yield (f_id, g_id, score, identity,
+                                f_strain, f_start, f_end, f_len,
+                                g_strain, g_start, g_end, g_len)
+            n += 1
 
 def generate_nx_string_graph(sg, lfc=False, disable_chimer_bridge_removal=False):
     LOG.debug("{}".format(sum([1 for c in itervalues(sg.e_reduce) if c])))
@@ -1428,10 +1371,10 @@ def print_utg_data0(u_edge_data):
 
 def ovlp_to_graph(args):
     # transitivity reduction, remove spurs, remove putative edges caused by repeats
-    overlap_data, contained_reads = parse_overlap_file(args.overlap_file, min_idt=args.min_idt, min_len=args.min_len)
-    sg = init_string_graph(overlap_data, contained_reads)
+    overlap_data = list(yield_from_overlap_file(args.overlap_file))
+    sg = init_string_graph(overlap_data)
     nxsg, edge_data = generate_nx_string_graph(sg, args.lfc, args.disable_chimer_bridge_removal)
-    del sg, overlap_data, contained_reads
+    del sg, overlap_data
 
     #dual_path = {}
     nxsg2 = init_sg2(edge_data)
@@ -1531,18 +1474,21 @@ Outputs:
     parser.add_argument(
         '--overlap-file', default='preads.m4',
         help='a file that contains the overlap information.')
+
+    # These are only for the filter, currently a separate program. They are ignored here.
     parser.add_argument(
         '--min_len', type=int, default=4000,
         help=argparse.SUPPRESS)
     parser.add_argument(
         '--min-len', type=int, default=4000,
-        help='minimum length of the reads to be considered for assembling')
+        help=argparse.SUPPRESS)
     parser.add_argument(
         '--min_idt', type=float, default=96,
         help=argparse.SUPPRESS)
     parser.add_argument(
         '--min-idt', type=float, default=96,
-        help='minimum alignment identity of the reads to be considered for assembling')
+        help=argparse.SUPPRESS)
+
     parser.add_argument(
         '--lfc', action="store_true", default=False,
         help='use local flow constraint method rather than best overlap method to resolve knots in string graph')
