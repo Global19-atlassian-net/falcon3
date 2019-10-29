@@ -3,7 +3,7 @@ try:
 except ModuleNotFoundError as exc:
     import warnings
     warnings.warn(exc)
-__version__ = '1.7.1'
+__version__ = '1.8.0'
 
 try:
     import sys, pkg_resources
