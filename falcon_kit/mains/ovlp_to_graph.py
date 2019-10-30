@@ -752,12 +752,12 @@ def yield_from_overlap_file(overlap_file):
             score = int(score)
             identity = float(identity)
             #contained_etc = l[12]
-            f_strain, f_start, f_end, f_len = (int(c) for c in l[4:8])
-            g_strain, g_start, g_end, g_len = (int(c) for c in l[8:12])
+            f_strand, f_start, f_end, f_len = (int(c) for c in l[4:8])
+            g_strand, g_start, g_end, g_len = (int(c) for c in l[8:12])
 
             yield (f_id, g_id, score, identity,
-                                f_strain, f_start, f_end, f_len,
-                                g_strain, g_start, g_end, g_len)
+                                f_strand, f_start, f_end, f_len,
+                                g_strand, g_start, g_end, g_len)
             n += 1
 
 def generate_nx_string_graph(sg, lfc=False, disable_chimer_bridge_removal=False):
