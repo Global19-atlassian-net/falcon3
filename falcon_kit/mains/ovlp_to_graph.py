@@ -1371,7 +1371,7 @@ def print_utg_data0(u_edge_data):
 
 def ovlp_to_graph(args):
     # transitivity reduction, remove spurs, remove putative edges caused by repeats
-    overlap_data = list(yield_from_overlap_file(args.overlap_file))
+    overlap_data = yield_from_overlap_file(args.overlap_file)
     sg = init_string_graph(overlap_data)
     nxsg, edge_data = generate_nx_string_graph(sg, args.lfc, args.disable_chimer_bridge_removal)
     del sg, overlap_data
