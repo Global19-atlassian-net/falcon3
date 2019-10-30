@@ -1519,8 +1519,19 @@ class HelpF(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatte
     pass
 
 def main(argv=sys.argv):
-    parser = argparse.ArgumentParser(description='a example string graph assembler that is desinged for handling diploid genomes',
-                                     formatter_class=HelpF)
+    epilog = """
+Outputs:
+    - ctg_paths
+    - c_path
+    - sg_edges_list
+    - chimer_nodes (if not --disable-chimer-bridge-removal)
+    - utg_data
+    - utg_data0 (maybe)
+"""
+    parser = argparse.ArgumentParser(
+            description='example string graph assembler that is desinged for handling diploid genomes',
+            epilog=epilog,
+            formatter_class=HelpF)
     parser.add_argument(
         '--overlap-file', default='preads.m4',
         help='a file that contains the overlap information.')
