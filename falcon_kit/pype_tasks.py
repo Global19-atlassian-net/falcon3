@@ -111,7 +111,8 @@ ln -sf {input.preads4falcon_fasta} ./preads4falcon.fasta
 
 # Given preads.m4,
 # write sg_edges_list, c_path, utg_data, ctg_paths.
-time python3 -m falcon_kit.mains.ovlp_to_graph {params.fc_ovlp_to_graph_option} --overlap-file preads.m4 >| fc_ovlp_to_graph.log
+falconc m4filt-contained --in preads.m4 --out preads.filtered.m4 --min-len 1
+time python3 -m falcon_kit.mains.ovlp_to_graph {params.fc_ovlp_to_graph_option} --overlap-file preads.filtered.m4 >| fc_ovlp_to_graph.log
 
 # Given sg_edges_list, utg_data, ctg_paths, preads4falcon.fasta,
 # write p_ctg.fasta and a_ctg_all.fasta,
