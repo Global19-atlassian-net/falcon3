@@ -123,13 +123,14 @@ def read_as_json(bytestream):
 def write_as_msgpack(bytestream, val):
     import msgpack
     content = msgpack.packb(val)
+    # msgpack is not sorted like JSON because OrderedDict can be preserved anyway.
     log('  Serialized to {} as msgpack'.format(eng(len(content))))
     bytestream.write(content)
 
 
 def write_as_json(bytestream, val):
     import json
-    content = json.dumps(val, indent=2, separators=(',', ': ')).encode('ascii')
+    content = json.dumps(val, sort_keys=True, indent=2, separators=(',', ': ')).encode('ascii')
     log('  Serialized to {} as json'.format(eng(len(content))))
     bytestream.write(content)
 
