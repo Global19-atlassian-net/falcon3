@@ -742,7 +742,6 @@ def yield_from_overlap_file(overlap_file):
     # loop through the overlapping data to load the data in the a python array
 
     with open(overlap_file) as f:
-        n = 0
         for line in f:
             if line.startswith('-'):
                 break
@@ -758,7 +757,6 @@ def yield_from_overlap_file(overlap_file):
             yield (f_id, g_id, score, identity,
                                 f_strand, f_start, f_end, f_len,
                                 g_strand, g_start, g_end, g_len)
-            n += 1
 
 def generate_nx_string_graph(sg, lfc=False, disable_chimer_bridge_removal=False):
     LOG.debug("{}".format(sum([1 for c in itervalues(sg.e_reduce) if c])))
@@ -1370,9 +1368,12 @@ def print_utg_data0(u_edge_data):
             print(s, v, t, type_, length, score, path_or_edges, file=f)
 
 def ovlp_to_graph(args):
-    # transitivity reduction, remove spurs, remove putative edges caused by repeats
     overlap_data = yield_from_overlap_file(args.overlap_file)
+
+    # transitivity reduction
     sg = init_string_graph(overlap_data)
+
+    # remove spurs, remove putative edges caused by repeats
     nxsg, edge_data = generate_nx_string_graph(sg, args.lfc, args.disable_chimer_bridge_removal)
     del sg, overlap_data
 
