@@ -227,8 +227,7 @@ def calc_cutoff_from_reverse_sorted_readlength_counts(rl_counts, target):
     total = sum(pair[0] * pair[1] for pair in rl_counts)
     subtotal = 0
     if target > total:
-        msg = 'Not enough reads available for desired genome coverage (bases needed={} > actual={})'.format(
-            target, total)
+        msg = f"Not enough reads available for desired genome coverage (bases needed={target:,} > actual={total:,})"
         raise GenomeCoverageError(msg)
     cutoff = 0
     for (rl, count) in rl_counts:
@@ -237,8 +236,7 @@ def calc_cutoff_from_reverse_sorted_readlength_counts(rl_counts, target):
             cutoff = rl
             break
     else:  # pragma: no cover
-        msg = 'Impossible target (probably a bug): target={target}, subtotal={subtotal}, total={total}'.format(
-            locals())
+        msg = f"Impossible target (probably a bug): target={target:,}, subtotal={subtotal:,}, total={total:,}"
         raise Exception(msg)
     return cutoff
 
