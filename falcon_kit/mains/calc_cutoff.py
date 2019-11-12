@@ -19,8 +19,7 @@ def run(genome_size, coverage, capture):
     try:
         cutoff = f.calc_cutoff(target, stats)
     except Exception as e:
-        msg = 'User-provided genome_size: {}\nDesired coverage: {}\n'.format(
-            genome_size, coverage)
+        msg = f"User-provided genome_size: {genome_size:,}\nDesired coverage: {coverage:,}\n"
         raise e.__class__(msg) from e
     sys.stdout.write(str(cutoff))
 
