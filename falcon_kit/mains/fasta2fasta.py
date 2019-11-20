@@ -10,8 +10,7 @@ Currently, we ignore zmw numbers and instead use a global counter.
 Inputs may be compressed, and may be either fasta or fastq.
 (For now, we ignore QVs.)
 """
-from future.utils import itervalues
-from builtins import object
+
 from ..util.system import abs_fns
 import argparse
 import glob
@@ -166,7 +165,7 @@ class WriterMap(object):
         return list(self.__obn2movie.keys())
 
     def close(self):
-        for ofs in itervalues(self.__movie2ofs):
+        for ofs in self.__movie2ofs.values():
             ofs.close()
 
     def __getitem__(self, movie):

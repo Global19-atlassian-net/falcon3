@@ -2,7 +2,7 @@
 The equal_*() funcs are not really needed with pytest,
 but they do not hurt.
 """
-from builtins import bytes
+
 from falcon_kit.io import NativeIO as StringIO
 import difflib
 import os.path

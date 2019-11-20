@@ -1,8 +1,3 @@
-
-
-
-
-from builtins import range
 from ctypes import (POINTER, c_char_p, c_uint, c_uint,
                     c_uint, c_uint, c_uint, c_double, string_at, pointer)
 from falcon_kit.multiproc import Pool

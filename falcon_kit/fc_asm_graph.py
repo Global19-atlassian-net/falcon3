@@ -1,7 +1,3 @@
-
-
-from builtins import zip
-from builtins import object
 from .FastaReader import open_fasta_reader
 from .io import FilePercenter
 import networkx as nx

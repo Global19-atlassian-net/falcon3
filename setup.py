@@ -11,7 +11,6 @@ from falcon_kit import __version__
 install_requires = [
     "networkx >=1.9.1",
     "msgpack",
-    "future >= 0.16.0",
     #"logging_tree",
     #"pbcore >= 0.6.3",
     "pypeFLOW >= 2.0.0",

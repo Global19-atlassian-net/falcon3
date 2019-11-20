@@ -1,6 +1,3 @@
-from future.utils import viewitems
-from future.utils import itervalues
-from builtins import object
 import networkx as nx
 import argparse
 import logging
@@ -101,7 +98,7 @@ class StringGraph(object):
             in_node.add_out_edge(edge)
             out_node.add_in_edge(edge)
         edge = self.edges[(in_node_name, out_node_name)]
-        for (k, v) in viewitems(attributes):
+        for (k, v) in attributes.items():
             edge.attr[k] = v
 
     def init_reduce_dict(self):
@@ -234,7 +231,7 @@ class StringGraph(object):
         for n in self.nodes:
             n_mark[n] = "vacant"
 
-        for (n_name, node) in viewitems(self.nodes):
+        for (n_name, node) in self.nodes.items():
 
             out_edges = node.out_edges
             if len(out_edges) == 0:
@@ -313,7 +310,7 @@ class StringGraph(object):
 
         LOG.debug(f"X {len(best_edges)}")
 
-        for (e_n, e) in viewitems(self.edges):
+        for (e_n, e) in self.edges.items():
             v = e_n[0]
             w = e_n[1]
             if self.e_reduce[(v, w)] != True:
@@ -330,7 +327,7 @@ class StringGraph(object):
 
         edges_to_reduce = []
         nodes_to_test = set()
-        for (v_n, v) in viewitems(self.nodes):
+        for (v_n, v) in self.nodes.items():
 
             out_nodes = []
             for e in v.out_edges:
@@ -759,8 +756,8 @@ def yield_from_overlap_file(overlap_file):
                                 g_strand, g_start, g_end, g_len)
 
 def generate_nx_string_graph(sg, lfc=False, disable_chimer_bridge_removal=False):
-    LOG.debug("{}".format(sum([1 for c in itervalues(sg.e_reduce) if c])))
-    LOG.debug("{}".format(sum([1 for c in itervalues(sg.e_reduce) if not c])))
+    LOG.debug("{}".format(sum([1 for c in sg.e_reduce.values() if c])))
+    LOG.debug("{}".format(sum([1 for c in sg.e_reduce.values() if not c])))
 
     if not disable_chimer_bridge_removal:
         chimer_nodes, chimer_edges = sg.mark_chimer_edges()
@@ -783,7 +780,7 @@ def generate_nx_string_graph(sg, lfc=False, disable_chimer_bridge_removal=False)
 
     spur_edges.update(sg.mark_spur_edge())
 
-    LOG.debug('{}'.format(sum([1 for c in itervalues(sg.e_reduce) if not c])))
+    LOG.debug('{}'.format(sum([1 for c in sg.e_reduce.values() if not c])))
 
     nxsg, edge_data = init_digraph(sg, chimer_edges, removed_edges, spur_edges)
     return nxsg, edge_data
@@ -877,7 +874,7 @@ def construct_compound_paths_2(compound_paths_1):
 
 def construct_compound_paths_3(ug, compound_paths_2, edge_to_cpath):
     compound_paths_3 = {}
-    for (k, val) in viewitems(compound_paths_2):
+    for (k, val) in compound_paths_2.items():
 
         start_node, NA, end_node = k
         rs = reverse_end(end_node)

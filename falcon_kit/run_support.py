@@ -1,5 +1,3 @@
-from future.utils import viewitems
-
 from . import bash, functional
 from .functional import cfg_tobool
 from .io import NativeIO
@@ -129,7 +127,7 @@ def dict2config(jdict, section):
     config = ConfigParser()
     if not config.has_section(section):
         config.add_section(section)
-    for (k, v) in viewitems(jdict):
+    for (k, v) in jdict.items():
         config.set(section, k, str(v))
     return config
 

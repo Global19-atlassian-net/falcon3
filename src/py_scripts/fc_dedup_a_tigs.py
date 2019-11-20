@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from falcon_kit.mains.dedup_a_tigs import main
 import sys
 

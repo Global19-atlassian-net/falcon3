@@ -33,13 +33,12 @@ def wrap_gen_task(script, inputs, outputs, rule_writer=None, parameters=None, di
         parameters = dict()
     if dist is None:
         dist = Dist()
-    from future.utils import viewitems
     rel_inputs = dict()
     rel_outputs = dict()
     # Make relative to CWD. (But better if caller does this.)
     def get_rel(maybe_abs):
         rel = dict()
-        for (k, v) in viewitems(maybe_abs):
+        for (k, v) in maybe_abs.items():
             try:
                 if os.path.isabs(v):
                     v = os.path.relpath(v)
@@ -82,8 +81,6 @@ def gen_parallel_tasks(
     assert 'dist' not in run_dict, 'dist should be a parameter of gen_parallel_tasks(), not of its run_dict'
     if dist is None:
         dist = Dist()
-    from future.utils import itervalues
-    #from future.utils import viewitems
     # run_dict['inputs'] should be patterns to match the inputs in split_fn, by convention.
 
     #task_parameters = resolved_dict(run_dict.get('parameters', {}))
@@ -127,7 +124,7 @@ def gen_parallel_tasks(
         #outputs = job['output']
         #params = job['params']
         #wildcards = job['wildcards']
-        #params.update({k: v for (k, v) in viewitems(job['wildcards'])}) # include expanded wildcards
+        #params.update({k: v for (k, v) in job['wildcards'].items()}) # include expanded wildcards
         #LOG.warning('OUT:{}'.format(outputs))
 
         wildcards = job['wildcards']
@@ -170,7 +167,7 @@ def gen_parallel_tasks(
                 parameters={}, # some are substituted from 'dist'
                 dist=dist,
         ))
-        wildcards_str = '_'.join(w for w in itervalues(job['wildcards']))
+        wildcards_str = '_'.join(w for w in job['wildcards'].values())
         job_name = 'job{}'.format(wildcards_str)
         task_results[job_name] = list(task_outputs.values())[0]
 
@@ -200,5 +197,4 @@ def gen_parallel_tasks(
 
 
 def dict_rel_paths(dict_paths):
-    from future.utils import viewitems
-    return {k: os.path.relpath(v) for (k, v) in viewitems(dict_paths)}
+    return {k: os.path.relpath(v) for (k, v) in dict_paths.items()}

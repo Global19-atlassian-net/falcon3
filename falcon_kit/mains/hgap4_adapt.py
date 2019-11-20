@@ -11,9 +11,6 @@ falcon dirs. We should fix that. But for now, we create writable run-dirs.
 We do *not* write into the HGAP4 run-dir.
 """
 
-
-
-from future.utils import viewitems
 from ..util.system import (cd, touch, make_dirs)
 import argparse
 import contextlib

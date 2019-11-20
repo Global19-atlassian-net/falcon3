@@ -2,9 +2,6 @@
 Not specific to FALCON.
 """
 
-
-#from builtins import str
-from builtins import object
 import contextlib
 import os
 import resource
