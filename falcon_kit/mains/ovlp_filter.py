@@ -1,7 +1,3 @@
-
-
-
-from builtins import range
 from falcon_kit.multiproc import Pool
 import falcon_kit.util.io as io
 import argparse

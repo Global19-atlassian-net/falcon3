@@ -17,11 +17,6 @@ After that the dedup_a_tigs.py script is used to deduplicate fake a_ctg.
 But that script is simple, and only depends on the alignment info that the previous script stored in the a_ctg header.
 """
 
-
-
-
-from builtins import zip
-from builtins import range
 import argparse
 import logging
 import sys

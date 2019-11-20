@@ -1,9 +1,3 @@
-
-
-
-
-from builtins import zip
-from builtins import range
 from falcon_kit import kup, falcon, DWA
 from falcon_kit.fc_asm_graph import AsmGraph
 import networkx as nx

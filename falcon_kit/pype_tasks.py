@@ -1,9 +1,3 @@
-
-
-
-
-from future.utils import viewitems
-from future.utils import itervalues
 # PypeTask functions now need to be module-level.
 from . import run_support as support
 from . import bash  # for scattering

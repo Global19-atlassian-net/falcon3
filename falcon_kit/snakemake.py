@@ -2,12 +2,6 @@
 TODO: Consolidate.
 """
 
-
-
-from future.utils import viewitems
-from future.utils import itervalues
-
-from builtins import object
 import json
 import os
 import re
@@ -53,7 +47,7 @@ class SnakemakeRuleWriter(object):
         # so we rename them and plan to symlink.
         wildcard_inputs = dict(inputs)
         nonwildcard_inputs = dict()
-        for (key, fn) in list(viewitems(wildcard_inputs)):
+        for (key, fn) in list(wildcard_inputs.items()):
             if '{' not in fn:
                 del wildcard_inputs[key]
                 nonwildcard_inputs[key] = fn
@@ -61,12 +55,12 @@ class SnakemakeRuleWriter(object):
             dn, bn = os.path.split(wildcard_inputs[key])
             wildcard_inputs[key] = os.path.join(dn + '.symlink', bn)
         rule_name = self.unique_rule_name(rule_name)
-        dynamic_output_kvs = ', '.join("%s=dynamic('%s')"%(k, os.path.normpath(v)) for (k, v) in viewitems(wildcard_inputs))
-        dynamic_input_kvs =  ', '.join("%s=ancient(dynamic('%s'))"%(k, os.path.normpath(v)) for (k, v) in viewitems(wildcard_outputs))
-        rule_parameters = {k: v for (k, v) in viewitems(parameters) if not k.startswith('_')}
-        params = ','.join('\n        %s="%s"'%(k,v) for (k, v) in viewitems(rule_parameters))
+        dynamic_output_kvs = ', '.join("%s=dynamic('%s')"%(k, os.path.normpath(v)) for (k, v) in wildcard_inputs.items())
+        dynamic_input_kvs =  ', '.join("%s=ancient(dynamic('%s'))"%(k, os.path.normpath(v)) for (k, v) in wildcard_outputs.items())
+        rule_parameters = {k: v for (k, v) in parameters.items() if not k.startswith('_')}
+        params = ','.join('\n        %s="%s"'%(k,v) for (k, v) in rule_parameters.items())
         pattern_kv_list = list()
-        for (name, wi) in viewitems(wildcard_inputs):
+        for (name, wi) in wildcard_inputs.items():
             fn_pattern = wi
             fn_pattern = fn_pattern.replace('{', '{{')
             fn_pattern = fn_pattern.replace('}', '}}')
@@ -82,7 +76,7 @@ rule dynamic_%(rule_name)s_split:
         self.write(rule)
 
         input_wildcards = set() # Not sure yet whether input must match output wildcards.
-        for wi_fn in itervalues(wildcard_inputs):
+        for wi_fn in wildcard_inputs:
             found = find_wildcards(wi_fn)
             input_wildcards.update(found)
         wildcards = list(sorted(input_wildcards))
@@ -94,12 +88,12 @@ rule dynamic_%(rule_name)s_split:
         self.write_script_rule(all_inputs, wildcard_outputs, params_plus_wildcards, shell_template, rule_name=None)
 
         wo_str_lists_list = ['%s=[str(i) for i in input.%s]' %(name, name) for name in list(wildcard_outputs.keys())]
-        wo_pattern_kv_list = ['%s="%s"' %(name, os.path.normpath(patt)) for (name, patt) in viewitems(wildcard_outputs)]
+        wo_pattern_kv_list = ['%s="%s"' %(name, os.path.normpath(patt)) for (name, patt) in wildcard_outputs.items()]
         wo_str_lists_kvs = ',\n              '.join(wo_str_lists_list)
         wo_pattern_kvs =   ',\n              '.join(wo_pattern_kv_list)
 
         wildcards = list()
-        for wi_fn in itervalues(wildcard_outputs):
+        for wi_fn in wildcard_outputs:
             found = find_wildcards(wi_fn)
             if wildcards:
                 assert wildcards == found, 'snakemake requires all outputs (and inputs?) to have the same wildcards'
@@ -132,12 +126,12 @@ rule dynamic_%(rule_name)s_merge:
         wildcard_rundir = os.path.normpath(os.path.dirname(first_output_fn)) # unsubstituted
         # We use snake_string_path b/c normpath drops leading ./, but we do NOT want abspath.
         input_kvs = ', '.join('%s=%s'%(k, snake_string_path(v)) for k,v in
-                sorted(viewitems(inputs)))
+                sorted(inputs.items()))
         output_kvs = ', '.join('%s=%s'%(k, snake_string_path(v)) for k,v in
-                sorted(viewitems(outputs)))
-        rule_parameters = {k: v for (k, v) in viewitems(parameters) if not k.startswith('_')}
+                sorted(outputs.items()))
+        rule_parameters = {k: v for (k, v) in parameters.items() if not k.startswith('_')}
         #rule_parameters['reltopdir'] = os.path.relpath('.', wildcard_rundir) # in case we need this later
-        params = ','.join('\n        %s="%s"'%(k,v) for (k, v) in viewitems(rule_parameters))
+        params = ','.join('\n        %s="%s"'%(k,v) for (k, v) in rule_parameters.items())
         shell = snake_shell(shell_template, wildcard_rundir)
         # cd $(dirname '{output.%(first_output_name)s}')
         rule = """
