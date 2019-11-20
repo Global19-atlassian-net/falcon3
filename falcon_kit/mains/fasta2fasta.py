@@ -165,7 +165,7 @@ class WriterMap(object):
         return list(self.__obn2movie.keys())
 
     def close(self):
-        for ofs in self.__movie2ofs:
+        for ofs in self.__movie2ofs.values():
             ofs.close()
 
     def __getitem__(self, movie):

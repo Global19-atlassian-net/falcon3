@@ -76,7 +76,7 @@ rule dynamic_%(rule_name)s_split:
         self.write(rule)
 
         input_wildcards = set() # Not sure yet whether input must match output wildcards.
-        for wi_fn in wildcard_inputs:
+        for wi_fn in wildcard_inputs.values():
             found = find_wildcards(wi_fn)
             input_wildcards.update(found)
         wildcards = list(sorted(input_wildcards))
@@ -93,7 +93,7 @@ rule dynamic_%(rule_name)s_split:
         wo_pattern_kvs =   ',\n              '.join(wo_pattern_kv_list)
 
         wildcards = list()
-        for wi_fn in wildcard_outputs:
+        for wi_fn in wildcard_outputs.values():
             found = find_wildcards(wi_fn)
             if wildcards:
                 assert wildcards == found, 'snakemake requires all outputs (and inputs?) to have the same wildcards'

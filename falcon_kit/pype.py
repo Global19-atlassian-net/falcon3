@@ -167,7 +167,7 @@ def gen_parallel_tasks(
                 parameters={}, # some are substituted from 'dist'
                 dist=dist,
         ))
-        wildcards_str = '_'.join(w for w in job['wildcards'])
+        wildcards_str = '_'.join(w for w in job['wildcards'].values())
         job_name = 'job{}'.format(wildcards_str)
         task_results[job_name] = list(task_outputs.values())[0]
 

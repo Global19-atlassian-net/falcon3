@@ -756,8 +756,8 @@ def yield_from_overlap_file(overlap_file):
                                 g_strand, g_start, g_end, g_len)
 
 def generate_nx_string_graph(sg, lfc=False, disable_chimer_bridge_removal=False):
-    LOG.debug("{}".format(sum([1 for c in sg.e_reduce if c])))
-    LOG.debug("{}".format(sum([1 for c in sg.e_reduce if not c])))
+    LOG.debug("{}".format(sum([1 for c in sg.e_reduce.values() if c])))
+    LOG.debug("{}".format(sum([1 for c in sg.e_reduce.values() if not c])))
 
     if not disable_chimer_bridge_removal:
         chimer_nodes, chimer_edges = sg.mark_chimer_edges()
@@ -780,7 +780,7 @@ def generate_nx_string_graph(sg, lfc=False, disable_chimer_bridge_removal=False)
 
     spur_edges.update(sg.mark_spur_edge())
 
-    LOG.debug('{}'.format(sum([1 for c in sg.e_reduce if not c])))
+    LOG.debug('{}'.format(sum([1 for c in sg.e_reduce.values() if not c])))
 
     nxsg, edge_data = init_digraph(sg, chimer_edges, removed_edges, spur_edges)
     return nxsg, edge_data
