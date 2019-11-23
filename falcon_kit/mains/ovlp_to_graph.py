@@ -3,6 +3,7 @@ import argparse
 import logging
 import os
 import random
+import re
 import shlex
 import subprocess
 import sys
@@ -633,11 +634,11 @@ def init_string_graph(overlap_data):
                 """
                 if f_b == 0 or g_e - g_l == 0:
                     continue
-                sg.add_edge("%s:B" % g_id, "%s:B" % f_id, label=(f_id, f_b, 0),
+                sg.add_edge("%s:B" % g_id, "%s:B" % f_id, label="%s:%d-%d"%(f_id, f_b, 0),
                             length=abs(f_b - 0),
                             score=-score,
                             identity=identity)
-                sg.add_edge("%s:E" % f_id, "%s:E" % g_id, label=(g_id, g_e, g_l),
+                sg.add_edge("%s:E" % f_id, "%s:E" % g_id, label="%s:%d-%d"%(g_id, g_e, g_l),
                             length=abs(g_e - g_l),
                             score=-score,
                             identity=identity)
@@ -650,11 +651,11 @@ def init_string_graph(overlap_data):
                 """
                 if f_b == 0 or g_e == 0:
                     continue
-                sg.add_edge("%s:E" % g_id, "%s:B" % f_id, label=(f_id, f_b, 0),
+                sg.add_edge("%s:E" % g_id, "%s:B" % f_id, label="%s:%d-%d"%(f_id, f_b, 0),
                             length=abs(f_b - 0),
                             score=-score,
                             identity=identity)
-                sg.add_edge("%s:E" % f_id, "%s:B" % g_id, label=(g_id, g_e, 0),
+                sg.add_edge("%s:E" % f_id, "%s:B" % g_id, label="%s:%d-%d"%(g_id, g_e, 0),
                             length=abs(g_e - 0),
                             score=-score,
                             identity=identity)
@@ -668,11 +669,11 @@ def init_string_graph(overlap_data):
                 """
                 if g_b == 0 or f_e - f_l == 0:
                     continue
-                sg.add_edge("%s:B" % f_id, "%s:B" % g_id, label=(g_id, g_b, 0),
+                sg.add_edge("%s:B" % f_id, "%s:B" % g_id, label="%s:%d-%d"%(g_id, g_b, 0),
                             length=abs(g_b - 0),
                             score=-score,
                             identity=identity)
-                sg.add_edge("%s:E" % g_id, "%s:E" % f_id, label=(f_id, f_e, f_l),
+                sg.add_edge("%s:E" % g_id, "%s:E" % f_id, label="%s:%d-%d"%(f_id, f_e, f_l),
                             length=abs(f_e - f_l),
                             score=-score,
                             identity=identity)
@@ -685,11 +686,11 @@ def init_string_graph(overlap_data):
                 """
                 if g_b - g_l == 0 or f_e - f_l == 0:
                     continue
-                sg.add_edge("%s:B" % f_id, "%s:E" % g_id, label=(g_id, g_b, g_l),
+                sg.add_edge("%s:B" % f_id, "%s:E" % g_id, label="%s:%d-%d"%(g_id, g_b, g_l),
                             length=abs(g_b - g_l),
                             score=-score,
                             identity=identity)
-                sg.add_edge("%s:B" % g_id, "%s:E" % f_id, label=(f_id, f_e, f_l),
+                sg.add_edge("%s:B" % g_id, "%s:E" % f_id, label="%s:%d-%d"%(f_id, f_e, f_l),
                             length=abs(f_e - f_l),
                             score=-score,
                             identity=identity)
@@ -698,16 +699,28 @@ def init_string_graph(overlap_data):
     sg.mark_tr_edges()  # mark those edges that transitive redundant
     return sg
 
+re_label = re.compile(r"(.*):(\d+)-(\d+)")
+
 def init_digraph(sg, chimer_edges, removed_edges, spur_edges):
     nxsg = nx.DiGraph()
     edge_data = {}
     with open("sg_edges_list", "w") as out_f:
         for v, w in sg.edges: # sort, or OrderedDict
             e = sg.edges[(v, w)]
-            rid, sp, tp = e.attr["label"]
+            label = e.attr["label"]
             score = e.attr["score"]
             identity = e.attr["identity"]
-            length = abs(sp - tp)
+            length = e.attr["length"]
+            try:
+                mo = re_label.search(label)
+                rid = mo.group(1)
+                sp = int(mo.group(2))
+                tp = int(mo.group(3))
+            except Exception:
+                msg = 'parsing label="{}"'.format(label)
+                LOG.exception(msg)
+                raise
+            assert length == abs(sp - tp)
 
             if not sg.e_reduce[(v, w)]:
                 type_ = "G"
@@ -722,7 +735,7 @@ def init_digraph(sg, chimer_edges, removed_edges, spur_edges):
                 type_ = "TR"
 
             if not sg.e_reduce[(v, w)]:
-                label = "%s:%d-%d" % (rid, sp, tp)
+                assert label == "%s:%d-%d" % (rid, sp, tp)
                 nxsg.add_edge(v, w, label=label, length=length, score=score)
                 edge_data[(v, w)] = (rid, sp, tp, length, score, identity, type_)
                 if w in sg.best_in:
