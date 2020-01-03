@@ -200,7 +200,6 @@ def try_run_ovlp_filter(out_fn, n_core, fofn, max_diff, max_cov, min_cov, min_le
         with open(tmp_out_fn, 'w') as outs:
             run_ovlp_filter(outs, exe_pool, file_list, max_diff, max_cov,
                             min_cov, min_len, min_idt, ignore_indels, bestn, db_fn)
-            outs.write('---\n')
         os.rename(tmp_out_fn, out_fn)
         io.LOG('finished ovlp_filter')
     except:
