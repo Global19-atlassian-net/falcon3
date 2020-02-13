@@ -1,9 +1,3 @@
-
-
-
-
-from future.utils import viewitems
-from future.utils import itervalues
 # PypeTask functions now need to be module-level.
 from . import run_support as support
 from . import bash  # for scattering
@@ -100,18 +94,19 @@ touch {output.job_done}
 """
 TASK_RUN_FALCON_ASM_SCRIPT = """\
 # Given, las_fofn.json,
-# write preads.ovl:
+# write preads.m4:
 
 # mobs uses binwrappers, so it does not see our "entry-points".
 # So, after dropping "src/py_scripts/*.py", we can call these via python3 -m:
 
-time python3 -m falcon_kit.mains.ovlp_filter --db {input.db_file} --las-fofn {input.las_fofn} {params.overlap_filtering_setting} --min-len {params.length_cutoff_pr} --out-fn preads.ovl
+time python3 -m falcon_kit.mains.ovlp_filter --db {input.db_file} --las-fofn {input.las_fofn} {params.overlap_filtering_setting} --min-len {params.length_cutoff_pr} --out-fn preads.m4
 
 ln -sf {input.preads4falcon_fasta} ./preads4falcon.fasta
 
-# Given preads.ovl,
+# Given preads.m4,
 # write sg_edges_list, c_path, utg_data, ctg_paths.
-time python3 -m falcon_kit.mains.ovlp_to_graph {params.fc_ovlp_to_graph_option} --overlap-file preads.ovl >| fc_ovlp_to_graph.log
+falconc m4filt-contained --in preads.m4 --out preads.filtered.m4 --min-len 1
+time python3 -m falcon_kit.mains.ovlp_to_graph {params.fc_ovlp_to_graph_option} --overlap-file preads.filtered.m4 >| fc_ovlp_to_graph.log
 
 # Given sg_edges_list, utg_data, ctg_paths, preads4falcon.fasta,
 # write p_ctg.fasta and a_ctg_all.fasta,
@@ -133,10 +128,12 @@ time python3 -m falcon_kit.mains.collect_contig_gfa >| contig.gfa.json
 # Output the assembly pread graph.
 time python3 -m falcon_kit.mains.gen_gfa_v1 asm.gfa.json >| asm.gfa
 time python3 -m falcon_kit.mains.gen_gfa_v2 asm.gfa.json >| asm.gfa2
+time python3 -m falcon_kit.mains.gen_bandage_csv asm.gfa.json >| asm.csv
 
 # Output the string graph.
 time python3 -m falcon_kit.mains.gen_gfa_v1 sg.gfa.json >| sg.gfa
 time python3 -m falcon_kit.mains.gen_gfa_v2 sg.gfa.json >| sg.gfa2
+time python3 -m falcon_kit.mains.gen_bandage_csv sg.gfa.json >| sg.csv
 
 # Output the contig graph with associate contigs attached to each primary contig.
 time python3 -m falcon_kit.mains.gen_gfa_v2 contig.gfa.json >| contig.gfa2

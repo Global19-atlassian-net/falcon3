@@ -1,7 +1,3 @@
-
-
-
-from future.utils import viewitems
 import argparse
 import collections
 import logging
@@ -65,7 +61,7 @@ def run(p_id2las_fn, db_fn, length_cutoff_fn, config_fn, wildcards,
     jobs = list()
     p_ids_merge_las = read_gathered_las(p_id2las_fn)
     tasks = []
-    for (p_id, las_fns) in viewitems(p_ids_merge_las):
+    for (p_id, las_fns) in p_ids_merge_las.items():
         assert len(las_fns) == 1, repr(las_fns)
         # since we know each merge-task is for a single block
         las_fn = las_fns[0]

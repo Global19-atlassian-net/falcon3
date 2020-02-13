@@ -5,13 +5,8 @@ See FALCON-pbsmrtpipe/pbfalcon/report_preassembly.py for XML version.
 # Copied from
 #   http://swarm/files/depot/branches/springfield/S2.3/software/smrtanalysis/bioinformatics/tools/pbreports/pbreports/report/preassembly.py
 
-
-
-
-from future.utils import viewitems
-from builtins import object
 from .FastaReader import open_fasta_reader
-from .util.io import syscall
+from .io import capture as syscall
 from . import functional
 import collections
 import glob
@@ -199,7 +194,7 @@ def stats_dict(stats_raw_reads, stats_seed_reads, stats_corrected_reads, genome_
 
     def round_if_float(v):
         return v if type(v) is not float else round(v, 3)
-    result = {k: round_if_float(v) for (k, v) in viewitems(kwds)}
+    result = {k: round_if_float(v) for (k, v) in kwds.items()}
     return result
 
 # DEPRECATED

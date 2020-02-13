@@ -1,9 +1,6 @@
 """Job pools for multiprocessing.
 """
 
-
-from builtins import map
-from builtins import object
 import multiprocessing
 
 

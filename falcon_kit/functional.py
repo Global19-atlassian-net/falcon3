@@ -1,11 +1,6 @@
 """Purely functional code.
 """
 
-
-
-
-
-from future.utils import viewitems
 from .io import NativeIO as StringIO
 import collections
 import logging
@@ -43,7 +38,7 @@ def get_daligner_job_descriptions_sans_LAcheck(run_jobs_stream, db_prefix, singl
     """
     descs = get_daligner_job_descriptions(run_jobs_stream, db_prefix, single)
     result = {}
-    for (k, v) in viewitems(descs):
+    for (k, v) in descs.items():
         bash = skip_LAcheck(v)
         bash = bash.replace(
             'LAsort', 'python3 -m falcon_kit.mains.LAsort {}'.format(db_prefix))
@@ -119,7 +114,7 @@ def get_las_filenames(mjob_data, db_prefix):
     result = {}
     re_LAmerge = re.compile(r'^LAmerge\s+(?:\-\S+\s+)(\S+)')
     re_LAcheck = re.compile(r'^LAcheck\s+(?:\-\S+\s+)\S+\s+(\S+)')
-    for (p_id, bash_lines) in viewitems(mjob_data):
+    for (p_id, bash_lines) in mjob_data.items():
         if not bash_lines:
             # The daligner+LAsort+LAmerge job produced the final .las
             # for this block. We will symlink it later.
@@ -227,8 +222,7 @@ def calc_cutoff_from_reverse_sorted_readlength_counts(rl_counts, target):
     total = sum(pair[0] * pair[1] for pair in rl_counts)
     subtotal = 0
     if target > total:
-        msg = 'Not enough reads available for desired genome coverage (bases needed={} > actual={})'.format(
-            target, total)
+        msg = f"Not enough reads available for desired genome coverage (bases needed={target:,} > actual={total:,})"
         raise GenomeCoverageError(msg)
     cutoff = 0
     for (rl, count) in rl_counts:
@@ -237,8 +231,7 @@ def calc_cutoff_from_reverse_sorted_readlength_counts(rl_counts, target):
             cutoff = rl
             break
     else:  # pragma: no cover
-        msg = 'Impossible target (probably a bug): target={target}, subtotal={subtotal}, total={total}'.format(
-            locals())
+        msg = f"Impossible target (probably a bug): target={target:,}, subtotal={subtotal:,}, total={total:,}"
         raise Exception(msg)
     return cutoff
 
@@ -355,7 +348,7 @@ def average_difference(dictA, dictB):
     If a value is missing from dictB, raise Exception.
     """
     total_diff = 0.0
-    for (k, va) in viewitems(dictA):
+    for (k, va) in dictA.items():
         vb = dictB[k]
         total_diff += (va - vb)
     return total_diff / len(dictA)

@@ -1,6 +1,3 @@
-
-
-
 from falcon_kit import fc_asm_graph
 import sys
 
@@ -28,16 +25,16 @@ def main(argv=sys.argv):
                     ctg_pair_links[(ctg1, ctg2)].add((v, w))
 
     utg_pair_links = {}
-    for (v, w) in list(sg_edges.keys()):
+    for (v, w) in sg_edges.keys():
         if v in node_to_utg and w in node_to_utg:
-            for u1 in list(node_to_utg[v]):
-                for u2 in list(node_to_utg[w]):
+            for u1 in node_to_utg[v]:
+                for u2 in node_to_utg[w]:
                     if u1 == u2:
                         continue
                     utg_pair_links.setdefault((u1, u2), set())
                     utg_pair_links[(u1, u2)].add((v, w))
 
-    for ctg1, ctg2 in ctg_pair_links:
+    for (ctg1, ctg2) in ctg_pair_links.keys():
         links = ctg_pair_links[(ctg1, ctg2)]
         count = len(links)
         if count > 0:

@@ -17,11 +17,6 @@ After that the dedup_a_tigs.py script is used to deduplicate fake a_ctg.
 But that script is simple, and only depends on the alignment info that the previous script stored in the a_ctg header.
 """
 
-
-
-
-from builtins import zip
-from builtins import range
 import argparse
 import logging
 import sys
@@ -257,7 +252,7 @@ def run(improper_p_ctg, proper_a_ctg, preads_fasta_fn, sg_edges_list_fn, utg_dat
             p_ctg_out.write('\n')
 
             a_id = 0
-            for v, w in a_ctg_group:
+            for (v, w) in a_ctg_group.keys():
                 atig_output = []
 
                 # Compose the base sequence.
@@ -301,6 +296,9 @@ def run(improper_p_ctg, proper_a_ctg, preads_fasta_fn, sg_edges_list_fn, utg_dat
     a_ctg_t_out.close()
     p_ctg_t_out.close()
 
+class HelpF(argparse.RawDescriptionHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+    pass
+
 def main(argv=sys.argv):
     description = 'Generate the primary and alternate contig fasta files and tiling paths, given the string graph.'
     epilog = """
@@ -313,7 +311,7 @@ We write these:
 """
     parser = argparse.ArgumentParser(
             description=description,
-            formatter_class=argparse.RawDescriptionHelpFormatter,
+            formatter_class=HelpF,
             epilog=epilog)
     parser.add_argument('--improper-p-ctg', action='store_true',
             help='Skip the initial read in each p_ctg path.')

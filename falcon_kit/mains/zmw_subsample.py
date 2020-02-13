@@ -123,12 +123,15 @@ def run(fp_in, coverage, genome_size, strategy_func):
     stats_dict = calc_stats(total_unique_molecular_bases, total_bases, output_bases, genome_size, coverage)
     return subsampled_zmws, zmws, stats_dict
 
+class HelpF(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+    pass
+
 def parse_args(argv):
     parser = argparse.ArgumentParser(description="Produces a list of ZMW where the median unique molecular "\
                                         "coverage sums up to the desired coverage of the given genome size, "\
                                         "given a specified subsampling strategy. Input is a TSV passed via stdin. "\
                                         "Output is to stdout.",
-                                        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                        formatter_class=HelpF)
     parser.add_argument('--strategy', type=str, default='random',
                         help='Subsampling strategy: random, longest')
     parser.add_argument('--coverage', type=float, default=60,

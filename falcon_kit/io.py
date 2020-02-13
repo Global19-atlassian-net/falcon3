@@ -103,7 +103,7 @@ def open_progress(fn, mode='r', log=LOG.info):
     fp.finish()
 
 
-def read_as_msgpack(bytestream):
+def read_as_msgpack(bytestream, log=log):
     import msgpack
     content = bytestream.read()
     log('  Read {} as msgpack'.format(eng(len(content))))
@@ -113,55 +113,64 @@ def read_as_msgpack(bytestream):
     )
 
 
-def read_as_json(bytestream):
+def read_as_json(bytestream, log=log):
     import json
     content = bytestream.read().decode('ascii')
     log('  Read {} as json'.format(eng(len(content))))
     return json.loads(content)
 
 
-def write_as_msgpack(bytestream, val):
+def write_as_msgpack(bytestream, val, log=log):
     import msgpack
     content = msgpack.packb(val)
+    # msgpack is not sorted like JSON because OrderedDict can be preserved anyway.
     log('  Serialized to {} as msgpack'.format(eng(len(content))))
     bytestream.write(content)
 
 
-def write_as_json(bytestream, val):
+def write_as_json(bytestream, val, log=log):
     import json
-    content = json.dumps(val, indent=2, separators=(',', ': ')).encode('ascii')
+    content = json.dumps(val, sort_keys=True, indent=2, separators=(',', ': ')).encode('ascii')
     log('  Serialized to {} as json'.format(eng(len(content))))
     bytestream.write(content)
 
 
-def deserialize(fn):
+def deserialize(fn, log=log):
     log('Deserializing from {!r}'.format(fn))
     with open(fn, 'rb') as ifs:
         log('  Opened for read: {!r}'.format(fn))
         if fn.endswith('.msgpack'):
-            val = read_as_msgpack(ifs)
+            val = read_as_msgpack(ifs, log=log)
         elif fn.endswith('.json'):
-            val = read_as_json(ifs)
+            val = read_as_json(ifs, log=log)
         else:
             raise Exception('Unknown extension for {!r}'.format(fn))
     log('  Deserialized {} records'.format(len(val)))
     return val
 
 
-def serialize(fn, val):
+def serialize(fn, val, only_if_needed=False, log=log):
     """Assume dirname exists.
     """
     log('Serializing {} records'.format(len(val)))
     mkdirs(os.path.dirname(fn))
+    ofs = io.BytesIO()
+    if fn.endswith('.msgpack'):
+        write_as_msgpack(ofs, val, log=log)
+    elif fn.endswith('.json'):
+        write_as_json(ofs, val, log=log)
+        ofs.write(b'\n') # for vim
+    else:
+        raise Exception('Unknown extension for {!r}'.format(fn))
+    content = ofs.getvalue()
+    if only_if_needed and os.path.exists(fn):
+        with open(fn, 'rb') as ifs:
+            current = ifs.read()
+        if current == content:
+            return
     with open(fn, 'wb') as ofs:
         log('  Opened for write: {!r}'.format(fn))
-        if fn.endswith('.msgpack'):
-            write_as_msgpack(ofs, val)
-        elif fn.endswith('.json'):
-            write_as_json(ofs, val)
-            ofs.write(b'\n') # for vim
-        else:
-            raise Exception('Unknown extension for {!r}'.format(fn))
+        ofs.write(content)
 
 
 def yield_abspath_from_fofn(fofn_fn):

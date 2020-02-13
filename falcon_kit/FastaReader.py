@@ -1,8 +1,3 @@
-
-
-from builtins import next
-from builtins import range
-from builtins import object
 from os.path import abspath, expanduser
 from .io import NativeIO as StringIO
 from .io import FilePercenter

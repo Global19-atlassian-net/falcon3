@@ -1,7 +1,3 @@
-
-
-
-from builtins import range
 from falcon_kit.multiproc import Pool
 import falcon_kit.util.io as io
 import argparse
@@ -204,7 +200,6 @@ def try_run_ovlp_filter(out_fn, n_core, fofn, max_diff, max_cov, min_cov, min_le
         with open(tmp_out_fn, 'w') as outs:
             run_ovlp_filter(outs, exe_pool, file_list, max_diff, max_cov,
                             min_cov, min_len, min_idt, ignore_indels, bestn, db_fn)
-            outs.write('---\n')
         os.rename(tmp_out_fn, out_fn)
         io.LOG('finished ovlp_filter')
     except:
@@ -238,7 +233,7 @@ def parse_args(argv):
         epilog=epilog,
         formatter_class=HelpF)
     parser.add_argument(
-        '--out-fn', default='preads.ovl',
+        '--out-fn', default='preads.m4',
         help='Output filename')
     parser.add_argument(
         '--n-core', type=int, default=4,

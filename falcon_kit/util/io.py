@@ -2,9 +2,6 @@
 Not specific to FALCON.
 """
 
-
-#from builtins import str
-from builtins import object
 import contextlib
 import os
 import resource
@@ -108,7 +105,7 @@ def syscall(cmd):
     """
     LOG('DEPRECATED falcon_kit.util.io.syscall()')
     LOG('$ {!r} >'.format(cmd))
-    output = sp.check_output(shlex.split(cmd), encoding='ascii')
+    output = sp.check_output(shlex.split(cmd), encoding='ascii') # pylint: disable=unexpected-keyword-arg
     if not output:
         msg = '%r failed to produce any output.' % cmd
         LOG('WARNING: %s' % msg)
